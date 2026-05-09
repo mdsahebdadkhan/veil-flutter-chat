@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, Plus, Search, ShieldCheck, MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useConversations, useDirectory } from "@/lib/chat-hooks";
-import type { ChatUser } from "@/lib/chat-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -50,7 +49,9 @@ function ChatsPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gradient leading-none">Veil</h1>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{user.email}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              @{profile?.username ?? "…"}
+            </p>
           </div>
         </div>
         <button
@@ -100,10 +101,12 @@ function ChatsPage() {
                     params={{ peerId: c.peer.id }}
                     className="flex items-center gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-white/5"
                   >
-                    <Avatar email={c.peer.email} online />
+                    <Avatar seed={c.peer.id} name={c.peer.display_name ?? c.peer.username} online />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-semibold">{c.peer.email}</span>
+                        <span className="truncate text-sm font-semibold">
+                          {c.peer.display_name ?? c.peer.username}
+                        </span>
                         <span className="text-[11px] text-muted-foreground shrink-0">
                           {formatDistanceToNowStrict(new Date(c.lastAt), { addSuffix: false })}
                         </span>
@@ -154,10 +157,20 @@ function ChatsPage() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <ul className="scrollbar-thin max-h-[60vh] space-y-1 overflow-y-auto">
+              <div className="relative mb-3">
+                <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  value={directoryQuery}
+                  onChange={(e) => setDirectoryQuery(e.target.value)}
+                  placeholder="Search by username…"
+                  autoFocus
+                  className="h-11 w-full rounded-2xl bg-input/60 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:bg-input focus:ring-2 focus:ring-ring/60"
+                />
+              </div>
+              <ul className="scrollbar-thin max-h-[55vh] space-y-1 overflow-y-auto">
                 {users.length === 0 && (
                   <p className="py-10 text-center text-sm text-muted-foreground">
-                    No other users yet. Invite someone to Veil!
+                    {directoryQuery ? "No users match that name." : "No other users yet."}
                   </p>
                 )}
                 {users.map((u, i) => (
@@ -173,8 +186,13 @@ function ChatsPage() {
                       onClick={() => setShowDirectory(false)}
                       className="flex items-center gap-3 rounded-2xl px-3 py-2.5 hover:bg-white/5"
                     >
-                      <Avatar email={u.email} online />
-                      <span className="truncate text-sm font-medium">{u.email}</span>
+                      <Avatar seed={u.id} name={u.display_name ?? u.username} online />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {u.display_name ?? u.username}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">@{u.username}</p>
+                      </div>
                     </Link>
                   </motion.li>
                 ))}
