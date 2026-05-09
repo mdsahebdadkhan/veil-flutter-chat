@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, Plus, Search, ShieldCheck, MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useConversations, useDirectory } from "@/lib/chat-hooks";
+import type { ChatUser } from "@/lib/chat-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -13,25 +14,28 @@ export const Route = createFileRoute("/chats")({
 });
 
 function ChatsPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [showDirectory, setShowDirectory] = useState(false);
   const [query, setQuery] = useState("");
+  const [directoryQuery, setDirectoryQuery] = useState("");
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
 
   const { conversations, loading: convLoading } = useConversations(user?.id);
-  const { users } = useDirectory(user?.id);
+  const { users } = useDirectory(user?.id, directoryQuery);
 
-  const filtered = useMemo(
-    () =>
-      query
-        ? conversations.filter((c) => c.peer.email.toLowerCase().includes(query.toLowerCase()))
-        : conversations,
-    [conversations, query]
-  );
+  const filtered = useMemo(() => {
+    if (!query) return conversations;
+    const q = query.toLowerCase();
+    return conversations.filter(
+      (c) =>
+        c.peer.username.toLowerCase().includes(q) ||
+        (c.peer.display_name?.toLowerCase().includes(q) ?? false)
+    );
+  }, [conversations, query]);
 
   if (!user) return null;
 
