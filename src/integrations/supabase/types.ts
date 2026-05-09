@@ -41,7 +41,21 @@ export type Database = {
             foreignKeyName: "messages_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -55,31 +69,66 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          display_name: string | null
           email: string
           id: string
           public_key: string | null
+          username: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email: string
           id: string
           public_key?: string | null
+          username: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string
           id?: string
           public_key?: string | null
+          username?: string
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          public_key: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          public_key?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          public_key?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      username_available: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

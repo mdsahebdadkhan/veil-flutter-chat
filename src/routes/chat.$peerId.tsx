@@ -26,11 +26,11 @@ function ChatPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase
-        .from("users")
-        .select("id, email, public_key")
+        .from("profiles")
+        .select("id, username, display_name, avatar_url, public_key")
         .eq("id", peerId)
         .maybeSingle();
-      setPeer(data ?? null);
+      setPeer((data as ChatUser | null) ?? null);
     })();
   }, [peerId]);
 
@@ -70,10 +70,10 @@ function ChatPage() {
         <Link to="/chats" className="rounded-full glass p-2 hover:bg-white/10 transition-colors">
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        {peer && <Avatar email={peer.email} size={38} online />}
+        {peer && <Avatar seed={peer.id} name={peer.display_name ?? peer.username} size={38} online />}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{peer?.email ?? "…"}</p>
-          <p className="text-[11px] text-online">online</p>
+          <p className="truncate text-sm font-semibold">{peer?.display_name ?? peer?.username ?? "…"}</p>
+          <p className="text-[11px] text-muted-foreground">@{peer?.username ?? ""}</p>
         </div>
       </header>
 
@@ -146,7 +146,7 @@ function ChatPage() {
 
           {messages.length === 0 && (
             <div className="mt-20 text-center text-sm text-muted-foreground">
-              <p>This is the beginning of your conversation with {peer?.email}.</p>
+              <p>This is the beginning of your conversation with {peer?.display_name ?? peer?.username ?? "this user"}.</p>
               <p className="mt-1 text-[11px]">Messages are stored encryption-ready.</p>
             </div>
           )}

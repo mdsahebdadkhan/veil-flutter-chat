@@ -2,11 +2,19 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { decryptMessage, encryptMessage } from "@/lib/encryption";
 
+/**
+ * Public profile shape — NEVER contains email or any PII.
+ * Backed by the `profiles` view (security invoker) which excludes email.
+ */
 export interface ChatUser {
   id: string;
-  email: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
   public_key: string | null;
 }
+
+const PROFILE_COLUMNS = "id, username, display_name, avatar_url, public_key" as const;
 
 export interface Message {
   id: string;
@@ -18,8 +26,18 @@ export interface Message {
   text: string;
 }
 
-/** All other users in the directory. */
-export function useDirectory(currentUserId: string | undefined) {
+/** Fetch a single public profile by id. */
+export async function fetchProfile(id: string): Promise<ChatUser | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  return (data as ChatUser | null) ?? null;
+}
+
+/** All other users in the directory, optionally filtered by username search. */
+export function useDirectory(currentUserId: string | undefined, search = "") {
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,20 +45,26 @@ export function useDirectory(currentUserId: string | undefined) {
     if (!currentUserId) return;
     let active = true;
     (async () => {
-      const { data } = await supabase
-        .from("users")
-        .select("id, email, public_key")
+      let query = supabase
+        .from("profiles")
+        .select(PROFILE_COLUMNS)
         .neq("id", currentUserId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(100);
+      const term = search.trim().toLowerCase();
+      if (term) {
+        query = query.or(`username.ilike.%${term}%,display_name.ilike.%${term}%`);
+      }
+      const { data } = await query;
       if (active) {
-        setUsers(data ?? []);
+        setUsers((data as ChatUser[] | null) ?? []);
         setLoading(false);
       }
     })();
     return () => {
       active = false;
     };
-  }, [currentUserId]);
+  }, [currentUserId, search]);
 
   return { users, loading };
 }
@@ -87,12 +111,12 @@ export function useConversations(currentUserId: string | undefined) {
     }
 
     const { data: peers } = await supabase
-      .from("users")
-      .select("id, email, public_key")
+      .from("profiles")
+      .select(PROFILE_COLUMNS)
       .in("id", Array.from(peerIds));
 
     const byId = new Map<string, ChatUser>();
-    for (const p of peers ?? []) byId.set(p.id, p);
+    for (const p of (peers as ChatUser[] | null) ?? []) byId.set(p.id, p);
 
     const result: ConversationSummary[] = [];
     for (const [peerId, last] of latestByPeer.entries()) {
@@ -207,4 +231,13 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
   );
 
   return { messages, loading, send };
+}
+
+/** Username availability check via the `username_available` SQL function. */
+export async function checkUsernameAvailable(username: string): Promise<boolean> {
+  const normalized = username.trim().toLowerCase();
+  if (!/^[a-z0-9_]{3,30}$/.test(normalized)) return false;
+  const { data, error } = await supabase.rpc("username_available", { _username: normalized });
+  if (error) return false;
+  return Boolean(data);
 }
