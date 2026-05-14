@@ -310,9 +310,23 @@ function Field({
   minLength?: number;
   trailing?: React.ReactNode;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <div className="group relative">
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+      {/* Soft focus glow */}
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-2xl"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.68 0.22 295 / 0.5), oklch(0.65 0.24 320 / 0.4))",
+          filter: "blur(10px)",
+        }}
+        initial={false}
+        animate={{ opacity: focused ? 0.55 : 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      />
+      <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-muted-foreground">
         {icon}
       </span>
       <input
@@ -320,12 +334,14 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         required={required}
         minLength={minLength}
-        className="h-12 w-full rounded-2xl bg-input/60 pl-11 pr-11 text-sm outline-none ring-0 transition-all placeholder:text-muted-foreground focus:bg-input focus:ring-2 focus:ring-ring/60"
+        className="relative h-12 w-full rounded-2xl bg-input/60 pl-11 pr-11 text-sm outline-none ring-0 transition-all placeholder:text-muted-foreground focus:bg-input focus:ring-2 focus:ring-ring/60"
       />
       {trailing && (
-        <span className="absolute right-4 top-1/2 -translate-y-1/2">{trailing}</span>
+        <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">{trailing}</span>
       )}
     </div>
   );
