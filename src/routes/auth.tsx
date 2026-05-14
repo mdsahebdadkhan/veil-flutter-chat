@@ -277,7 +277,7 @@ function AuthPage() {
           </p>
         )}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
