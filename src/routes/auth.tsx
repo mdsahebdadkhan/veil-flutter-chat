@@ -262,14 +262,17 @@ function AuthPage() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <button
+        <motion.button
           onClick={onGoogle}
           disabled={busy}
+          whileHover={{ scale: 1.015, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 22 }}
           className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl glass text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-60"
         >
           <GoogleIcon />
           Continue with Google
-        </button>
+        </motion.button>
 
         {mode === "signup" && (
           <p className="mt-4 text-center text-[11px] text-muted-foreground">
