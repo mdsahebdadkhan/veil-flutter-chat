@@ -73,9 +73,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { pathname } = useLocation();
+  // Use the first two path segments as the transition key so navigating within
+  // a section (e.g. /chat/$peerId) doesn't re-trigger fades on every param change.
+  const key = pathname.split("/").slice(0, 3).join("/") || "/";
   return (
     <AuthProvider>
-      <Outlet />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={key}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Outlet />
+        </motion.div>
+      </AnimatePresence>
       <Toaster />
     </AuthProvider>
   );
