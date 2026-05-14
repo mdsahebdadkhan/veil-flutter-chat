@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { FloatingParticles } from "@/components/FloatingParticles";
 import { checkUsernameAvailable } from "@/lib/chat-hooks";
 import { toast } from "sonner";
 
