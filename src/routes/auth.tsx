@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { FloatingParticles } from "@/components/FloatingParticles";
 import { checkUsernameAvailable } from "@/lib/chat-hooks";
 import { toast } from "sonner";
 
@@ -116,25 +117,42 @@ function AuthPage() {
     (mode === "signup" && (usernameStatus === "checking" || usernameStatus === "taken" || usernameStatus === "invalid" || !username));
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="relative flex min-h-screen items-center justify-center px-4 py-10"
+    >
       <AuroraBackground />
+      <FloatingParticles count={22} />
       <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
         className="glass-strong w-full max-w-md rounded-3xl p-8 shadow-soft"
+        style={{ backdropFilter: "blur(28px) saturate(180%)" }}
       >
-        <div className="flex flex-col items-center text-center">
+        <div className="relative flex flex-col items-center text-center">
+          {/* Animated glow behind the logo */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -top-6 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full blur-2xl"
+            style={{ background: "var(--gradient-primary)" }}
+            animate={{ opacity: [0.35, 0.65, 0.35], scale: [0.95, 1.1, 0.95] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+          />
           <motion.div
             initial={{ scale: 0.6, rotate: -12 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 220, damping: 16 }}
-            className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-glow"
+            whileHover={{ scale: 1.05, rotate: 2 }}
+            className="relative flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-glow"
           >
             <ShieldCheck className="h-7 w-7 text-primary-foreground" />
           </motion.div>
-          <h1 className="mt-4 text-3xl font-bold text-gradient">Veil</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="relative mt-4 text-3xl font-bold text-gradient">Veil</h1>
+          <p className="relative mt-1 text-sm text-muted-foreground">
             {mode === "signin" ? "Welcome back. Step behind the veil." : "Create your private space."}
           </p>
         </div>
@@ -219,7 +237,9 @@ function AuthPage() {
             minLength={6}
           />
           <motion.button
+            whileHover={{ scale: 1.015, y: -1 }}
             whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
             disabled={submitDisabled}
             type="submit"
             className="flex h-12 w-full items-center justify-center rounded-2xl gradient-primary text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-60"
@@ -244,14 +264,17 @@ function AuthPage() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <button
+        <motion.button
           onClick={onGoogle}
           disabled={busy}
+          whileHover={{ scale: 1.015, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 22 }}
           className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl glass text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-60"
         >
           <GoogleIcon />
           Continue with Google
-        </button>
+        </motion.button>
 
         {mode === "signup" && (
           <p className="mt-4 text-center text-[11px] text-muted-foreground">
@@ -259,7 +282,7 @@ function AuthPage() {
           </p>
         )}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -289,9 +312,23 @@ function Field({
   minLength?: number;
   trailing?: React.ReactNode;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <div className="group relative">
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+      {/* Soft focus glow */}
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-2xl"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.68 0.22 295 / 0.5), oklch(0.65 0.24 320 / 0.4))",
+          filter: "blur(10px)",
+        }}
+        initial={false}
+        animate={{ opacity: focused ? 0.55 : 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      />
+      <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-muted-foreground">
         {icon}
       </span>
       <input
@@ -299,12 +336,14 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         required={required}
         minLength={minLength}
-        className="h-12 w-full rounded-2xl bg-input/60 pl-11 pr-11 text-sm outline-none ring-0 transition-all placeholder:text-muted-foreground focus:bg-input focus:ring-2 focus:ring-ring/60"
+        className="relative h-12 w-full rounded-2xl bg-input/60 pl-11 pr-11 text-sm outline-none ring-0 transition-all placeholder:text-muted-foreground focus:bg-input focus:ring-2 focus:ring-ring/60"
       />
       {trailing && (
-        <span className="absolute right-4 top-1/2 -translate-y-1/2">{trailing}</span>
+        <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">{trailing}</span>
       )}
     </div>
   );
