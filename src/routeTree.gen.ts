@@ -9,19 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatPeerIdRouteImport } from './routes/chat.$peerId'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppGroupsRouteImport } from './routes/_app.groups'
+import { Route as AppExploreRouteImport } from './routes/_app.explore'
+import { Route as AppChatsRouteImport } from './routes/_app.chats'
 
-const ChatsRoute = ChatsRouteImport.update({
-  id: '/chats',
-  path: '/chats',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -34,55 +37,108 @@ const ChatPeerIdRoute = ChatPeerIdRouteImport.update({
   path: '/chat/$peerId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGroupsRoute = AppGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExploreRoute = AppExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatsRoute = AppChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chats': typeof ChatsRoute
+  '/chats': typeof AppChatsRoute
+  '/explore': typeof AppExploreRoute
+  '/groups': typeof AppGroupsRoute
+  '/profile': typeof AppProfileRoute
   '/chat/$peerId': typeof ChatPeerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chats': typeof ChatsRoute
+  '/chats': typeof AppChatsRoute
+  '/explore': typeof AppExploreRoute
+  '/groups': typeof AppGroupsRoute
+  '/profile': typeof AppProfileRoute
   '/chat/$peerId': typeof ChatPeerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/chats': typeof ChatsRoute
+  '/_app/chats': typeof AppChatsRoute
+  '/_app/explore': typeof AppExploreRoute
+  '/_app/groups': typeof AppGroupsRoute
+  '/_app/profile': typeof AppProfileRoute
   '/chat/$peerId': typeof ChatPeerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chats' | '/chat/$peerId'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/chats'
+    | '/explore'
+    | '/groups'
+    | '/profile'
+    | '/chat/$peerId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chats' | '/chat/$peerId'
-  id: '__root__' | '/' | '/auth' | '/chats' | '/chat/$peerId'
+  to:
+    | '/'
+    | '/auth'
+    | '/chats'
+    | '/explore'
+    | '/groups'
+    | '/profile'
+    | '/chat/$peerId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/auth'
+    | '/_app/chats'
+    | '/_app/explore'
+    | '/_app/groups'
+    | '/_app/profile'
+    | '/chat/$peerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ChatsRoute: typeof ChatsRoute
   ChatPeerIdRoute: typeof ChatPeerIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/chats': {
-      id: '/chats'
-      path: '/chats'
-      fullPath: '/chats'
-      preLoaderRoute: typeof ChatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -99,13 +155,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatPeerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/groups': {
+      id: '/_app/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof AppGroupsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/explore': {
+      id: '/_app/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof AppExploreRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/chats': {
+      id: '/_app/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof AppChatsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppChatsRoute: typeof AppChatsRoute
+  AppExploreRoute: typeof AppExploreRoute
+  AppGroupsRoute: typeof AppGroupsRoute
+  AppProfileRoute: typeof AppProfileRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppChatsRoute: AppChatsRoute,
+  AppExploreRoute: AppExploreRoute,
+  AppGroupsRoute: AppGroupsRoute,
+  AppProfileRoute: AppProfileRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
-  ChatsRoute: ChatsRoute,
   ChatPeerIdRoute: ChatPeerIdRoute,
 }
 export const routeTree = rootRouteImport

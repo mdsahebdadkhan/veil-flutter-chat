@@ -7,6 +7,8 @@ interface Props {
   name: string;
   size?: number;
   online?: boolean;
+  /** When true, show an animated pulsing ring around the online dot. */
+  pulse?: boolean;
 }
 
 const palette = [
@@ -18,7 +20,7 @@ const palette = [
   "linear-gradient(135deg,#22d3ee,#a78bfa)",
 ];
 
-export function Avatar({ seed, name, size = 44, online }: Props) {
+export function Avatar({ seed, name, size = 44, online, pulse = true }: Props) {
   const initial = (name?.[0] ?? seed?.[0] ?? "?").toUpperCase();
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
@@ -28,15 +30,30 @@ export function Avatar({ seed, name, size = 44, online }: Props) {
     <div className="relative shrink-0" style={{ width: size, height: size }} aria-label={name}>
       <motion.div
         whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 320, damping: 22 }}
         className="flex h-full w-full items-center justify-center rounded-full text-white font-semibold shadow-bubble"
         style={{ background: bg, fontSize: size * 0.42 }}
       >
         {initial}
       </motion.div>
       {online !== undefined && (
-        <span
-          className={`absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2 ring-background ${online ? "bg-online" : "bg-muted-foreground"}`}
-        />
+        <span className="absolute bottom-0 right-0">
+          <span
+            className={`relative block h-3 w-3 rounded-full ring-2 ring-background ${
+              online ? "bg-online" : "bg-muted-foreground"
+            }`}
+          >
+            {online && pulse && (
+              <motion.span
+                aria-hidden
+                className="absolute inset-0 rounded-full bg-online"
+                animate={{ scale: [1, 2, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+              />
+            )}
+          </span>
+        </span>
       )}
     </div>
   );

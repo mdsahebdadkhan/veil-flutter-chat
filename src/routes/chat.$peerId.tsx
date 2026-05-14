@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Paperclip, Send, Smile } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useThread, type ChatUser } from "@/lib/chat-hooks";
@@ -154,7 +154,19 @@ function ChatPage() {
       </div>
 
       <form onSubmit={onSend} className="z-20 px-3 pb-4 pt-2">
-        <div className="glass-strong mx-auto flex max-w-2xl items-end gap-2 rounded-3xl p-2 shadow-soft">
+        <div className="glass-strong mx-auto flex max-w-2xl items-end gap-1 rounded-3xl p-1.5 shadow-soft">
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.9 }}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            aria-label="Attach file"
+            onClick={() => {
+              /* media sharing arrives in Phase 3 */
+            }}
+          >
+            <Paperclip className="h-4 w-4" />
+          </motion.button>
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -166,8 +178,17 @@ function ChatPage() {
             }}
             rows={1}
             placeholder="Message…"
-            className="scrollbar-thin max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
+            className="scrollbar-thin max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground"
           />
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.9 }}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            aria-label="Emoji"
+          >
+            <Smile className="h-4 w-4" />
+          </motion.button>
           <motion.button
             type="submit"
             whileTap={{ scale: 0.88 }}
