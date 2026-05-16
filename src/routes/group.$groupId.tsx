@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Users as UsersIcon, LogOut, X, UserMinus } from "lucide-react";
+import { ArrowLeft, Users as UsersIcon, LogOut, X, UserMinus } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useGroup, useGroupThread, leaveGroup, removeGroupMember } from "@/lib/group-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { MessageComposer } from "@/components/MessageComposer";
+import { MediaBubble } from "@/components/MediaBubble";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday } from "date-fns";
 
