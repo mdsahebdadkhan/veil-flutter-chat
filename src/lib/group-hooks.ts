@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { decryptMessage, encryptMessage } from "@/lib/encryption";
-import { fetchProfiles, type ChatUser, type Message } from "@/lib/chat-hooks";
+import {
+  classifyMedia,
+  decodeMessageRow,
+  fetchProfiles,
+  type ChatUser,
+  type Message,
+  type SendAttachment,
+} from "@/lib/chat-hooks";
 
 export interface Group {
   id: string;
