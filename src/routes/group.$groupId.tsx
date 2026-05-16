@@ -300,6 +300,17 @@ function GroupChatPage() {
                         Admin
                       </span>
                     )}
+                    {user &&
+                      m.user_id !== user.id &&
+                      memberById.get(user.id)?.role === "admin" && (
+                        <button
+                          onClick={() => removeGroupMember(groupId, m.user_id)}
+                          className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
+                          aria-label="Remove member"
+                        >
+                          <UserMinus className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                   </li>
                 ))}
               </ul>
