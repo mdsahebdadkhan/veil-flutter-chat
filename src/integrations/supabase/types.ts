@@ -108,14 +108,22 @@ export type Database = {
           encrypted_message: string
           group_id: string | null
           id: string
+          media_name: string | null
+          media_size: number | null
+          media_type: string | null
+          media_url: string | null
           receiver_id: string | null
           sender_id: string
         }
         Insert: {
           created_at?: string
-          encrypted_message: string
+          encrypted_message?: string
           group_id?: string | null
           id?: string
+          media_name?: string | null
+          media_size?: number | null
+          media_type?: string | null
+          media_url?: string | null
           receiver_id?: string | null
           sender_id: string
         }
@@ -124,6 +132,10 @@ export type Database = {
           encrypted_message?: string
           group_id?: string | null
           id?: string
+          media_name?: string | null
+          media_size?: number | null
+          media_type?: string | null
+          media_url?: string | null
           receiver_id?: string | null
           sender_id?: string
         }
