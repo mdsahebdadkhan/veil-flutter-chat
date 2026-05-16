@@ -214,38 +214,14 @@ function GroupChatPage() {
         </div>
       </div>
 
-      <form onSubmit={onSend} className="z-20 px-3 pb-4 pt-2">
-        <div className="glass-strong mx-auto flex max-w-2xl items-end gap-1 rounded-3xl p-1.5 shadow-soft">
-          <textarea
-            value={draft}
-            onChange={(e) => {
-              setDraft(e.target.value);
-              if (e.target.value.trim()) broadcastTyping();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSend(e as unknown as React.FormEvent);
-              }
-            }}
-            rows={1}
-            placeholder="Message group…"
-            className="scrollbar-thin max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <motion.button
-            type="submit"
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ scale: 1.05 }}
-            disabled={!draft.trim()}
-            animate={{ opacity: draft.trim() ? 1 : 0.4, rotate: draft.trim() ? 0 : -15 }}
-            transition={{ type: "spring", stiffness: 320, damping: 20 }}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gradient-primary shadow-glow"
-            aria-label="Send"
-          >
-            <Send className="h-4 w-4 text-primary-foreground" />
-          </motion.button>
-        </div>
-      </form>
+      <MessageComposer
+        currentUserId={user.id}
+        onSend={async (text, att) => {
+          await send(text, att);
+        }}
+        onTyping={broadcastTyping}
+        placeholder="Message group…"
+      />
 
       <AnimatePresence>
         {showInfo && (
