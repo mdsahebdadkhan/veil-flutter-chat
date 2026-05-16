@@ -154,9 +154,20 @@ export function useConversations(currentUserId: string | undefined) {
     for (const [peerId, last] of latestByPeer.entries()) {
       const peer = byId.get(peerId);
       if (!peer) continue;
+      const lastAny = last as typeof last & {
+        media_url?: string | null;
+        media_type?: string | null;
+      };
+      let lastText: string;
+      if (lastAny.media_url) {
+        const kind = classifyMedia(lastAny.media_type);
+        lastText = kind === "image" ? "📷 Photo" : kind === "video" ? "🎥 Video" : "📎 File";
+      } else {
+        lastText = await decryptMessage(last.encrypted_message);
+      }
       result.push({
         peer,
-        lastText: await decryptMessage(last.encrypted_message),
+        lastText,
         lastAt: last.created_at,
         unread: 0,
       });
