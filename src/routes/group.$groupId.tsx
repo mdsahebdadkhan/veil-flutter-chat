@@ -28,7 +28,10 @@ function GroupChatPage() {
   const { messages, send } = useGroupThread(user?.id, groupId);
   const [draft, setDraft] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [typing, setTyping] = useState<TypingPayload[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
@@ -36,13 +39,56 @@ function GroupChatPage() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, typing.length]);
 
   const memberById = useMemo(() => {
     const map = new Map<string, (typeof members)[number]>();
     for (const m of members) map.set(m.user_id, m);
     return map;
   }, [members]);
+
+  const me = user ? memberById.get(user.id)?.profile : undefined;
+  const myName = me?.display_name ?? me?.username ?? "Someone";
+
+  // Typing presence via Supabase broadcast.
+  useEffect(() => {
+    if (!user || !groupId) return;
+    const channel = supabase.channel(`typing:group:${groupId}`, {
+      config: { broadcast: { self: false } },
+    });
+    channel
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const p = payload as TypingPayload;
+        if (!p?.userId || p.userId === user.id) return;
+        setTyping((prev) => {
+          const next = prev.filter((t) => t.userId !== p.userId);
+          next.push({ ...p, at: Date.now() });
+          return next;
+        });
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    const interval = window.setInterval(() => {
+      setTyping((prev) => prev.filter((t) => Date.now() - t.at < 3500));
+    }, 1000);
+    return () => {
+      window.clearInterval(interval);
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+    };
+  }, [user, groupId]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!user) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1200) return;
+    lastTypingSentRef.current = now;
+    typingChannelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: user.id, name: myName, at: now } satisfies TypingPayload,
+    });
+  }, [user, myName]);
 
   const onSend = async (e: React.FormEvent) => {
     e.preventDefault();
