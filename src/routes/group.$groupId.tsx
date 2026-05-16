@@ -1,12 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Users as UsersIcon, LogOut, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useGroup, useGroupThread, leaveGroup } from "@/lib/group-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { TypingIndicator } from "@/components/TypingIndicator";
+import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday } from "date-fns";
+
+interface TypingPayload {
+  userId: string;
+  name: string;
+  at: number;
+}
 
 export const Route = createFileRoute("/group/$groupId")({
   component: GroupChatPage,
