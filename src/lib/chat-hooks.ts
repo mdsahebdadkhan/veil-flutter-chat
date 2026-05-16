@@ -16,6 +16,16 @@ export interface ChatUser {
 
 const PROFILE_COLUMNS = "id, username, display_name, avatar_url, public_key" as const;
 
+export type MediaKind = "image" | "video" | "file";
+
+export interface MessageMedia {
+  url: string;
+  type: MediaKind;
+  mime: string;
+  name: string;
+  size: number;
+}
+
 export interface Message {
   id: string;
   sender_id: string;
@@ -27,6 +37,17 @@ export interface Message {
   created_at: string;
   /** Decrypted in-memory only. Never persisted. */
   text: string;
+  media_url: string | null;
+  media_type: string | null;
+  media_name: string | null;
+  media_size: number | null;
+}
+
+export function classifyMedia(mime: string | null | undefined): MediaKind {
+  if (!mime) return "file";
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  return "file";
 }
 
 /** Fetch a single public profile by id. */
