@@ -63,7 +63,7 @@ export function useUserGroups(currentUserId: string | undefined) {
       supabase.from("group_members").select("group_id").in("group_id", groupIds),
       supabase
         .from("messages")
-        .select("group_id, encrypted_message, created_at")
+        .select("group_id, encrypted_message, created_at, media_url, media_type")
         .in("group_id", groupIds)
         .order("created_at", { ascending: false })
         .limit(500),
@@ -77,10 +77,15 @@ export function useUserGroups(currentUserId: string | undefined) {
     const lastByGroup = new Map<string, { text: string; at: string }>();
     for (const m of lastMsgs ?? []) {
       if (!m.group_id || lastByGroup.has(m.group_id)) continue;
-      lastByGroup.set(m.group_id, {
-        text: await decryptMessage(m.encrypted_message),
-        at: m.created_at,
-      });
+      const mAny = m as typeof m & { media_url?: string | null; media_type?: string | null };
+      let text: string;
+      if (mAny.media_url) {
+        const kind = classifyMedia(mAny.media_type);
+        text = kind === "image" ? "📷 Photo" : kind === "video" ? "🎥 Video" : "📎 File";
+      } else {
+        text = await decryptMessage(m.encrypted_message);
+      }
+      lastByGroup.set(m.group_id, { text, at: m.created_at });
     }
 
     const summaries: GroupSummary[] = (groupRows ?? []).map((g) => {
