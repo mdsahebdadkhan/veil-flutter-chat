@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Users as UsersIcon, LogOut, X, UserMinus } from "lucide-react";
+import { ArrowLeft, Users as UsersIcon, LogOut, X, UserMinus } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useGroup, useGroupThread, leaveGroup, removeGroupMember } from "@/lib/group-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { MessageComposer } from "@/components/MessageComposer";
+import { MediaBubble } from "@/components/MediaBubble";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday } from "date-fns";
 
@@ -167,7 +169,7 @@ function GroupChatPage() {
                     )}
                     {!mine && grouped && <div style={{ width: 28 }} />}
                     <div
-                      className={`max-w-[78%] px-4 py-2.5 text-sm leading-relaxed shadow-bubble ${
+                      className={`max-w-[78%] space-y-1.5 px-3 py-2 text-sm leading-relaxed shadow-bubble ${
                         mine
                           ? "rounded-2xl rounded-br-md text-bubble-me-foreground"
                           : "rounded-2xl rounded-bl-md bg-bubble-them text-bubble-them-foreground"
@@ -175,13 +177,16 @@ function GroupChatPage() {
                       style={mine ? { background: "var(--gradient-bubble-me)" } : undefined}
                     >
                       {!mine && !grouped && sender && (
-                        <p className="mb-0.5 text-[11px] font-semibold text-primary">
+                        <p className="px-1 text-[11px] font-semibold text-primary">
                           {sender.display_name ?? sender.username}
                         </p>
                       )}
-                      <p className="whitespace-pre-wrap break-words">{m.text || "…"}</p>
+                      {m.media_url && <MediaBubble message={m} mine={mine} />}
+                      {m.text && (
+                        <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>
+                      )}
                       <span
-                        className={`mt-1 block text-[10px] ${
+                        className={`block text-[10px] ${
                           mine ? "text-white/70" : "text-muted-foreground"
                         } text-right`}
                       >
@@ -209,38 +214,14 @@ function GroupChatPage() {
         </div>
       </div>
 
-      <form onSubmit={onSend} className="z-20 px-3 pb-4 pt-2">
-        <div className="glass-strong mx-auto flex max-w-2xl items-end gap-1 rounded-3xl p-1.5 shadow-soft">
-          <textarea
-            value={draft}
-            onChange={(e) => {
-              setDraft(e.target.value);
-              if (e.target.value.trim()) broadcastTyping();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSend(e as unknown as React.FormEvent);
-              }
-            }}
-            rows={1}
-            placeholder="Message group…"
-            className="scrollbar-thin max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <motion.button
-            type="submit"
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ scale: 1.05 }}
-            disabled={!draft.trim()}
-            animate={{ opacity: draft.trim() ? 1 : 0.4, rotate: draft.trim() ? 0 : -15 }}
-            transition={{ type: "spring", stiffness: 320, damping: 20 }}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gradient-primary shadow-glow"
-            aria-label="Send"
-          >
-            <Send className="h-4 w-4 text-primary-foreground" />
-          </motion.button>
-        </div>
-      </form>
+      <MessageComposer
+        currentUserId={user.id}
+        onSend={async (text, att) => {
+          await send(text, att);
+        }}
+        onTyping={broadcastTyping}
+        placeholder="Message group…"
+      />
 
       <AnimatePresence>
         {showInfo && (

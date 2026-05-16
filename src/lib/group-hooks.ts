@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { decryptMessage, encryptMessage } from "@/lib/encryption";
-import { fetchProfiles, type ChatUser, type Message } from "@/lib/chat-hooks";
+import {
+  classifyMedia,
+  decodeMessageRow,
+  fetchProfiles,
+  type ChatUser,
+  type Message,
+  type SendAttachment,
+} from "@/lib/chat-hooks";
 
 export interface Group {
   id: string;
@@ -56,7 +63,7 @@ export function useUserGroups(currentUserId: string | undefined) {
       supabase.from("group_members").select("group_id").in("group_id", groupIds),
       supabase
         .from("messages")
-        .select("group_id, encrypted_message, created_at")
+        .select("group_id, encrypted_message, created_at, media_url, media_type")
         .in("group_id", groupIds)
         .order("created_at", { ascending: false })
         .limit(500),
@@ -70,10 +77,15 @@ export function useUserGroups(currentUserId: string | undefined) {
     const lastByGroup = new Map<string, { text: string; at: string }>();
     for (const m of lastMsgs ?? []) {
       if (!m.group_id || lastByGroup.has(m.group_id)) continue;
-      lastByGroup.set(m.group_id, {
-        text: await decryptMessage(m.encrypted_message),
-        at: m.created_at,
-      });
+      const mAny = m as typeof m & { media_url?: string | null; media_type?: string | null };
+      let text: string;
+      if (mAny.media_url) {
+        const kind = classifyMedia(mAny.media_type);
+        text = kind === "image" ? "📷 Photo" : kind === "video" ? "🎥 Video" : "📎 File";
+      } else {
+        text = await decryptMessage(m.encrypted_message);
+      }
+      lastByGroup.set(m.group_id, { text, at: m.created_at });
     }
 
     const summaries: GroupSummary[] = (groupRows ?? []).map((g) => {
@@ -197,9 +209,12 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
         .order("created_at", { ascending: true });
       if (!active) return;
       const decoded = await Promise.all(
-        (data ?? []).map(async (m) => ({ ...m, text: await decryptMessage(m.encrypted_message) }))
+        (data ?? []).map(async (m) => {
+          const base = decodeMessageRow(m as Record<string, unknown>);
+          return { ...base, text: await decryptMessage(base.encrypted_message) };
+        })
       );
-      setMessages(decoded as Message[]);
+      setMessages(decoded);
       setLoading(false);
     })();
     return () => {
@@ -215,13 +230,14 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `group_id=eq.${groupId}` },
         async (payload) => {
-          const row = payload.new as Omit<Message, "text">;
+          const row = payload.new as Record<string, unknown>;
+          const base = decodeMessageRow(row);
           setMessages((prev) => {
-            if (prev.some((m) => m.id === row.id)) return prev;
-            return [...prev, { ...row, text: "" }];
+            if (prev.some((m) => m.id === base.id)) return prev;
+            return [...prev, base];
           });
-          const text = await decryptMessage(row.encrypted_message);
-          setMessages((prev) => prev.map((m) => (m.id === row.id ? { ...m, text } : m)));
+          const text = await decryptMessage(base.encrypted_message);
+          setMessages((prev) => prev.map((m) => (m.id === base.id ? { ...m, text } : m)));
         }
       )
       .subscribe();
@@ -231,14 +247,21 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
   }, [groupId]);
 
   const send = useCallback(
-    async (text: string) => {
-      if (!currentUserId || !groupId || !text.trim()) return;
-      const ciphertext = await encryptMessage(text.trim());
-      await supabase.from("messages").insert({
+    async (text: string, attachment?: SendAttachment) => {
+      if (!currentUserId || !groupId) return;
+      const trimmed = text.trim();
+      if (!trimmed && !attachment) return;
+      const ciphertext = trimmed ? await encryptMessage(trimmed) : "";
+      const { error } = await supabase.from("messages").insert({
         sender_id: currentUserId,
         group_id: groupId,
         encrypted_message: ciphertext,
+        media_url: attachment?.url ?? null,
+        media_type: attachment?.mime ?? null,
+        media_name: attachment?.name ?? null,
+        media_size: attachment?.size ?? null,
       });
+      if (error) throw error;
     },
     [currentUserId, groupId]
   );
@@ -253,7 +276,7 @@ export async function createGroup(input: {
   description?: string | null;
   avatarUrl?: string | null;
   memberIds?: string[];
-}): Promise<Group | null> {
+}): Promise<Group> {
   const { data: group, error } = await supabase
     .from("groups")
     .insert({
@@ -265,13 +288,16 @@ export async function createGroup(input: {
     .select()
     .single();
 
-  if (error || !group) return null;
+  if (error || !group) {
+    throw new Error(error?.message || "Failed to create group");
+  }
 
   const extras = (input.memberIds ?? []).filter((id) => id !== input.createdBy);
   if (extras.length > 0) {
-    await supabase.from("group_members").insert(
-      extras.map((user_id) => ({ group_id: group.id, user_id, role: "member" as const }))
-    );
+    const { error: mErr } = await supabase
+      .from("group_members")
+      .insert(extras.map((user_id) => ({ group_id: group.id, user_id, role: "member" as const })));
+    if (mErr) throw new Error(mErr.message);
   }
   return group as Group;
 }
