@@ -169,7 +169,7 @@ function GroupChatPage() {
                     )}
                     {!mine && grouped && <div style={{ width: 28 }} />}
                     <div
-                      className={`max-w-[78%] px-4 py-2.5 text-sm leading-relaxed shadow-bubble ${
+                      className={`max-w-[78%] space-y-1.5 px-3 py-2 text-sm leading-relaxed shadow-bubble ${
                         mine
                           ? "rounded-2xl rounded-br-md text-bubble-me-foreground"
                           : "rounded-2xl rounded-bl-md bg-bubble-them text-bubble-them-foreground"
@@ -177,13 +177,16 @@ function GroupChatPage() {
                       style={mine ? { background: "var(--gradient-bubble-me)" } : undefined}
                     >
                       {!mine && !grouped && sender && (
-                        <p className="mb-0.5 text-[11px] font-semibold text-primary">
+                        <p className="px-1 text-[11px] font-semibold text-primary">
                           {sender.display_name ?? sender.username}
                         </p>
                       )}
-                      <p className="whitespace-pre-wrap break-words">{m.text || "…"}</p>
+                      {m.media_url && <MediaBubble message={m} mine={mine} />}
+                      {m.text && (
+                        <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>
+                      )}
                       <span
-                        className={`mt-1 block text-[10px] ${
+                        className={`block text-[10px] ${
                           mine ? "text-white/70" : "text-muted-foreground"
                         } text-right`}
                       >
