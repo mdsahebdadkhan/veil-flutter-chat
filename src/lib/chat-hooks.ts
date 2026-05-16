@@ -296,18 +296,15 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
       const trimmed = text.trim();
       if (!trimmed && !attachment) return;
       const ciphertext = trimmed ? await encryptMessage(trimmed) : "";
-      const payload: Record<string, unknown> = {
+      const { error } = await supabase.from("messages").insert({
         sender_id: currentUserId,
         receiver_id: peerId,
         encrypted_message: ciphertext,
-      };
-      if (attachment) {
-        payload.media_url = attachment.url;
-        payload.media_type = attachment.mime;
-        payload.media_name = attachment.name;
-        payload.media_size = attachment.size;
-      }
-      const { error } = await supabase.from("messages").insert(payload);
+        media_url: attachment?.url ?? null,
+        media_type: attachment?.mime ?? null,
+        media_name: attachment?.name ?? null,
+        media_size: attachment?.size ?? null,
+      });
       if (error) throw error;
     },
     [currentUserId, peerId]
