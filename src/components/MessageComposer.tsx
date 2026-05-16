@@ -157,13 +157,11 @@ export function MessageComposer({ currentUserId, onSend, onTyping, placeholder =
                 </div>
               }
             >
-              {/* @ts-expect-error - default export */}
               <EmojiPicker
-                theme="dark"
                 lazyLoadEmojis
                 width="100%"
                 height={320}
-                onEmojiClick={(d: { emoji: string }) => insertEmoji(d.emoji)}
+                onEmojiClick={(d) => insertEmoji(d.emoji)}
               />
             </Suspense>
           </motion.div>
