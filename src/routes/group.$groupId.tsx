@@ -194,7 +194,13 @@ function GroupChatPage() {
             })}
           </AnimatePresence>
 
-          {messages.length === 0 && (
+          <AnimatePresence>
+            {typing.map((t) => (
+              <TypingIndicator key={t.userId} label={t.name} />
+            ))}
+          </AnimatePresence>
+
+          {messages.length === 0 && typing.length === 0 && (
             <div className="mt-20 text-center text-sm text-muted-foreground">
               <p>No messages in {group?.name ?? "this group"} yet.</p>
               <p className="mt-1 text-[11px]">Say hi to get the conversation started.</p>
