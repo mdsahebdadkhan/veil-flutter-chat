@@ -206,6 +206,29 @@ export function useConversations(currentUserId: string | undefined) {
   return { conversations, loading, reload };
 }
 
+export interface SendAttachment {
+  url: string;
+  mime: string;
+  name: string;
+  size: number;
+}
+
+export function decodeMessageRow(row: Record<string, unknown>): Message {
+  return {
+    id: row.id as string,
+    sender_id: row.sender_id as string,
+    receiver_id: (row.receiver_id as string | null) ?? null,
+    group_id: (row.group_id as string | null) ?? null,
+    encrypted_message: (row.encrypted_message as string) ?? "",
+    created_at: row.created_at as string,
+    text: "",
+    media_url: (row.media_url as string | null) ?? null,
+    media_type: (row.media_type as string | null) ?? null,
+    media_name: (row.media_name as string | null) ?? null,
+    media_size: (row.media_size as number | null) ?? null,
+  };
+}
+
 /** Live messages between current user and a peer. */
 export function useThread(currentUserId: string | undefined, peerId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -225,9 +248,12 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
         .order("created_at", { ascending: true });
       if (!active) return;
       const decoded = await Promise.all(
-        (data ?? []).map(async (m) => ({ ...m, text: await decryptMessage(m.encrypted_message) }))
+        (data ?? []).map(async (m) => {
+          const base = decodeMessageRow(m as Record<string, unknown>);
+          return { ...base, text: await decryptMessage(base.encrypted_message) };
+        })
       );
-      setMessages(decoded as Message[]);
+      setMessages(decoded);
       setLoading(false);
     })();
     return () => {
@@ -243,18 +269,19 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         async (payload) => {
-          const row = payload.new as Omit<Message, "text">;
+          const row = payload.new as Record<string, unknown>;
           if (row.group_id) return;
           const involves =
             (row.sender_id === currentUserId && row.receiver_id === peerId) ||
             (row.sender_id === peerId && row.receiver_id === currentUserId);
           if (!involves) return;
+          const base = decodeMessageRow(row);
           setMessages((prev) => {
-            if (prev.some((m) => m.id === row.id)) return prev;
-            return [...prev, { ...row, text: "" }];
+            if (prev.some((m) => m.id === base.id)) return prev;
+            return [...prev, base];
           });
-          const text = await decryptMessage(row.encrypted_message);
-          setMessages((prev) => prev.map((m) => (m.id === row.id ? { ...m, text } : m)));
+          const text = await decryptMessage(base.encrypted_message);
+          setMessages((prev) => prev.map((m) => (m.id === base.id ? { ...m, text } : m)));
         }
       )
       .subscribe();
@@ -264,14 +291,24 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
   }, [currentUserId, peerId]);
 
   const send = useCallback(
-    async (text: string) => {
-      if (!currentUserId || !peerId || !text.trim()) return;
-      const ciphertext = await encryptMessage(text.trim());
-      await supabase.from("messages").insert({
+    async (text: string, attachment?: SendAttachment) => {
+      if (!currentUserId || !peerId) return;
+      const trimmed = text.trim();
+      if (!trimmed && !attachment) return;
+      const ciphertext = trimmed ? await encryptMessage(trimmed) : "";
+      const payload: Record<string, unknown> = {
         sender_id: currentUserId,
         receiver_id: peerId,
         encrypted_message: ciphertext,
-      });
+      };
+      if (attachment) {
+        payload.media_url = attachment.url;
+        payload.media_type = attachment.mime;
+        payload.media_name = attachment.name;
+        payload.media_size = attachment.size;
+      }
+      const { error } = await supabase.from("messages").insert(payload);
+      if (error) throw error;
     },
     [currentUserId, peerId]
   );
