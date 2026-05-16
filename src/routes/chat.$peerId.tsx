@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Paperclip, Send, Smile } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useThread, type ChatUser } from "@/lib/chat-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { MessageComposer } from "@/components/MessageComposer";
+import { MediaBubble } from "@/components/MediaBubble";
 import { format, isToday, isYesterday } from "date-fns";
 
 export const Route = createFileRoute("/chat/$peerId")({
