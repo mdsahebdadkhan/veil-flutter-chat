@@ -276,7 +276,7 @@ export async function createGroup(input: {
   description?: string | null;
   avatarUrl?: string | null;
   memberIds?: string[];
-}): Promise<Group | null> {
+}): Promise<Group> {
   const { data: group, error } = await supabase
     .from("groups")
     .insert({
@@ -288,13 +288,16 @@ export async function createGroup(input: {
     .select()
     .single();
 
-  if (error || !group) return null;
+  if (error || !group) {
+    throw new Error(error?.message || "Failed to create group");
+  }
 
   const extras = (input.memberIds ?? []).filter((id) => id !== input.createdBy);
   if (extras.length > 0) {
-    await supabase.from("group_members").insert(
-      extras.map((user_id) => ({ group_id: group.id, user_id, role: "member" as const }))
-    );
+    const { error: mErr } = await supabase
+      .from("group_members")
+      .insert(extras.map((user_id) => ({ group_id: group.id, user_id, role: "member" as const })));
+    if (mErr) throw new Error(mErr.message);
   }
   return group as Group;
 }
