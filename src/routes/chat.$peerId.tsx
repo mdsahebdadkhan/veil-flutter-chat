@@ -37,30 +37,11 @@ function ChatPage() {
   }, [peerId]);
 
   const { messages, send } = useThread(user?.id, peerId);
-  const [draft, setDraft] = useState("");
-  const [typing, setTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
-
-  // Local UI-only typing simulation: shows when peer is "active" (other end recently sent).
-  useEffect(() => {
-    const last = messages[messages.length - 1];
-    if (!last || last.sender_id === user?.id) {
-      setTyping(false);
-      return;
-    }
-  }, [messages, user?.id]);
-
-  const onSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    setDraft("");
-    await send(text);
-  };
 
   if (!user) return null;
 
