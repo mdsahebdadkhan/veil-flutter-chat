@@ -1,12 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Users as UsersIcon, LogOut, X } from "lucide-react";
+import { ArrowLeft, Send, Users as UsersIcon, LogOut, X, UserMinus } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { useGroup, useGroupThread, leaveGroup } from "@/lib/group-hooks";
+import { useGroup, useGroupThread, leaveGroup, removeGroupMember } from "@/lib/group-hooks";
 import { Avatar } from "@/components/Avatar";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { TypingIndicator } from "@/components/TypingIndicator";
+import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday } from "date-fns";
+
+interface TypingPayload {
+  userId: string;
+  name: string;
+  at: number;
+}
 
 export const Route = createFileRoute("/group/$groupId")({
   component: GroupChatPage,
@@ -20,7 +28,10 @@ function GroupChatPage() {
   const { messages, send } = useGroupThread(user?.id, groupId);
   const [draft, setDraft] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [typing, setTyping] = useState<TypingPayload[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
@@ -28,13 +39,56 @@ function GroupChatPage() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, typing.length]);
 
   const memberById = useMemo(() => {
     const map = new Map<string, (typeof members)[number]>();
     for (const m of members) map.set(m.user_id, m);
     return map;
   }, [members]);
+
+  const me = user ? memberById.get(user.id)?.profile : undefined;
+  const myName = me?.display_name ?? me?.username ?? "Someone";
+
+  // Typing presence via Supabase broadcast.
+  useEffect(() => {
+    if (!user || !groupId) return;
+    const channel = supabase.channel(`typing:group:${groupId}`, {
+      config: { broadcast: { self: false } },
+    });
+    channel
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const p = payload as TypingPayload;
+        if (!p?.userId || p.userId === user.id) return;
+        setTyping((prev) => {
+          const next = prev.filter((t) => t.userId !== p.userId);
+          next.push({ ...p, at: Date.now() });
+          return next;
+        });
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    const interval = window.setInterval(() => {
+      setTyping((prev) => prev.filter((t) => Date.now() - t.at < 3500));
+    }, 1000);
+    return () => {
+      window.clearInterval(interval);
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+    };
+  }, [user, groupId]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!user) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1200) return;
+    lastTypingSentRef.current = now;
+    typingChannelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: user.id, name: myName, at: now } satisfies TypingPayload,
+    });
+  }, [user, myName]);
 
   const onSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +194,13 @@ function GroupChatPage() {
             })}
           </AnimatePresence>
 
-          {messages.length === 0 && (
+          <AnimatePresence>
+            {typing.map((t) => (
+              <TypingIndicator key={t.userId} label={t.name} />
+            ))}
+          </AnimatePresence>
+
+          {messages.length === 0 && typing.length === 0 && (
             <div className="mt-20 text-center text-sm text-muted-foreground">
               <p>No messages in {group?.name ?? "this group"} yet.</p>
               <p className="mt-1 text-[11px]">Say hi to get the conversation started.</p>
@@ -153,7 +213,10 @@ function GroupChatPage() {
         <div className="glass-strong mx-auto flex max-w-2xl items-end gap-1 rounded-3xl p-1.5 shadow-soft">
           <textarea
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              if (e.target.value.trim()) broadcastTyping();
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -237,6 +300,17 @@ function GroupChatPage() {
                         Admin
                       </span>
                     )}
+                    {user &&
+                      m.user_id !== user.id &&
+                      memberById.get(user.id)?.role === "admin" && (
+                        <button
+                          onClick={() => removeGroupMember(groupId, m.user_id)}
+                          className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
+                          aria-label="Remove member"
+                        >
+                          <UserMinus className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                   </li>
                 ))}
               </ul>
