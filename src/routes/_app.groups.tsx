@@ -165,6 +165,7 @@ function CreateGroupSheet({
   onCreated: () => void;
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [search, setSearch] = useState("");
@@ -177,6 +178,31 @@ function CreateGroupSheet({
     setDescription("");
     setSearch("");
     setPicked(new Set());
+  };
+
+  const submit = async () => {
+    if (!user || !name.trim() || busy) return;
+    setBusy(true);
+    try {
+      const g = await createGroup({
+        createdBy: user.id,
+        name,
+        description,
+        memberIds: Array.from(picked),
+      });
+      toast.success("Group created", {
+        description: `${g.name} is ready. Invite more anytime.`,
+      });
+      reset();
+      onClose();
+      onCreated();
+      navigate({ to: "/group/$groupId", params: { groupId: g.id } });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not create group";
+      toast.error("Failed to create group", { description: msg });
+    } finally {
+      setBusy(false);
+    }
   };
 
   const togglePick = (id: string) => {
