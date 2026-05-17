@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Users, X, Search, Check, Sparkles } from "lucide-react";
+import { Plus, Users, X, Search, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useUserGroups, createGroup } from "@/lib/group-hooks";
