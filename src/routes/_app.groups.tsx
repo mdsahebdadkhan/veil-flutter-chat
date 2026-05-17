@@ -214,22 +214,6 @@ function CreateGroupSheet({
     });
   };
 
-  const submit = async () => {
-    if (!user || !name.trim() || busy) return;
-    setBusy(true);
-    const g = await createGroup({
-      createdBy: user.id,
-      name,
-      description,
-      memberIds: Array.from(picked),
-    });
-    setBusy(false);
-    if (g) {
-      reset();
-      onClose();
-      onCreated();
-    }
-  };
 
   return (
     <AnimatePresence>
