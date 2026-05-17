@@ -206,10 +206,22 @@ function GroupChatPage() {
           </AnimatePresence>
 
           {messages.length === 0 && typing.length === 0 && (
-            <div className="mt-20 text-center text-sm text-muted-foreground">
-              <p>No messages in {group?.name ?? "this group"} yet.</p>
-              <p className="mt-1 text-[11px]">Say hi to get the conversation started.</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="mx-auto mt-16 flex max-w-xs flex-col items-center gap-3 text-center"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 -z-10 rounded-full bg-primary/30 blur-2xl" />
+                {group && <Avatar seed={group.id} name={group.name} size={64} />}
+              </div>
+              <p className="text-sm font-semibold">Welcome to {group?.name ?? "your group"}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                This is the start of your private group chat. Messages are end-to-end encrypted.
+                Say hi and break the ice ✨
+              </p>
+            </motion.div>
           )}
         </div>
       </div>
