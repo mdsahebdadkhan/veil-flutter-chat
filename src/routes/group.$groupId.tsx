@@ -10,6 +10,7 @@ import { TypingIndicator } from "@/components/TypingIndicator";
 import { MessageComposer } from "@/components/MessageComposer";
 import { MediaBubble } from "@/components/MediaBubble";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { format, isToday, isYesterday } from "date-fns";
 
 interface TypingPayload {
@@ -102,8 +103,26 @@ function GroupChatPage() {
 
   const onLeave = async () => {
     if (!user) return;
-    await leaveGroup(groupId, user.id);
-    navigate({ to: "/groups" });
+    try {
+      await leaveGroup(groupId, user.id);
+      toast.success("Left group");
+      navigate({ to: "/groups" });
+    } catch (err) {
+      toast.error("Could not leave group", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
+  };
+
+  const onRemoveMember = async (memberId: string) => {
+    try {
+      await removeGroupMember(groupId, memberId);
+      toast.success("Member removed");
+    } catch (err) {
+      toast.error("Could not remove member", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
   };
 
   if (!user) return null;
@@ -206,10 +225,22 @@ function GroupChatPage() {
           </AnimatePresence>
 
           {messages.length === 0 && typing.length === 0 && (
-            <div className="mt-20 text-center text-sm text-muted-foreground">
-              <p>No messages in {group?.name ?? "this group"} yet.</p>
-              <p className="mt-1 text-[11px]">Say hi to get the conversation started.</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="mx-auto mt-16 flex max-w-xs flex-col items-center gap-3 text-center"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 -z-10 rounded-full bg-primary/30 blur-2xl" />
+                {group && <Avatar seed={group.id} name={group.name} size={64} />}
+              </div>
+              <p className="text-sm font-semibold">Welcome to {group?.name ?? "your group"}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                This is the start of your private group chat. Messages are end-to-end encrypted.
+                Say hi and break the ice ✨
+              </p>
+            </motion.div>
           )}
         </div>
       </div>
@@ -285,7 +316,7 @@ function GroupChatPage() {
                       m.user_id !== user.id &&
                       memberById.get(user.id)?.role === "admin" && (
                         <button
-                          onClick={() => removeGroupMember(groupId, m.user_id)}
+                          onClick={() => onRemoveMember(m.user_id)}
                           className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
                           aria-label="Remove member"
                         >

@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Users, X, Search, Check } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useUserGroups, createGroup } from "@/lib/group-hooks";
 import { useDirectory } from "@/lib/chat-hooks";
@@ -164,6 +165,7 @@ function CreateGroupSheet({
   onCreated: () => void;
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [search, setSearch] = useState("");
@@ -178,6 +180,31 @@ function CreateGroupSheet({
     setPicked(new Set());
   };
 
+  const submit = async () => {
+    if (!user || !name.trim() || busy) return;
+    setBusy(true);
+    try {
+      const g = await createGroup({
+        createdBy: user.id,
+        name,
+        description,
+        memberIds: Array.from(picked),
+      });
+      toast.success("Group created", {
+        description: `${g.name} is ready. Invite more anytime.`,
+      });
+      reset();
+      onClose();
+      onCreated();
+      navigate({ to: "/group/$groupId", params: { groupId: g.id } });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not create group";
+      toast.error("Failed to create group", { description: msg });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const togglePick = (id: string) => {
     setPicked((prev) => {
       const next = new Set(prev);
@@ -187,22 +214,6 @@ function CreateGroupSheet({
     });
   };
 
-  const submit = async () => {
-    if (!user || !name.trim() || busy) return;
-    setBusy(true);
-    const g = await createGroup({
-      createdBy: user.id,
-      name,
-      description,
-      memberIds: Array.from(picked),
-    });
-    setBusy(false);
-    if (g) {
-      reset();
-      onClose();
-      onCreated();
-    }
-  };
 
   return (
     <AnimatePresence>
