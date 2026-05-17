@@ -103,8 +103,26 @@ function GroupChatPage() {
 
   const onLeave = async () => {
     if (!user) return;
-    await leaveGroup(groupId, user.id);
-    navigate({ to: "/groups" });
+    try {
+      await leaveGroup(groupId, user.id);
+      toast.success("Left group");
+      navigate({ to: "/groups" });
+    } catch (err) {
+      toast.error("Could not leave group", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
+  };
+
+  const onRemoveMember = async (memberId: string) => {
+    try {
+      await removeGroupMember(groupId, memberId);
+      toast.success("Member removed");
+    } catch (err) {
+      toast.error("Could not remove member", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
   };
 
   if (!user) return null;
