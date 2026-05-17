@@ -316,7 +316,7 @@ function GroupChatPage() {
                       m.user_id !== user.id &&
                       memberById.get(user.id)?.role === "admin" && (
                         <button
-                          onClick={() => removeGroupMember(groupId, m.user_id)}
+                          onClick={() => onRemoveMember(m.user_id)}
                           className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
                           aria-label="Remove member"
                         >
