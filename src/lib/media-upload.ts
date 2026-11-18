@@ -6,7 +6,7 @@ export const MAX_MEDIA_BYTES = 25 * 1024 * 1024; // 25 MB
 export async function uploadChatMedia(
   userId: string,
   file: File,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
 ): Promise<SendAttachment> {
   if (file.size > MAX_MEDIA_BYTES) {
     throw new Error("File is larger than 25 MB.");
@@ -22,13 +22,11 @@ export async function uploadChatMedia(
   }, 250);
 
   try {
-    const { error } = await supabase.storage
-      .from("chat-media")
-      .upload(path, file, {
-        cacheControl: "3600",
-        contentType: file.type || "application/octet-stream",
-        upsert: false,
-      });
+    const { error } = await supabase.storage.from("chat-media").upload(path, file, {
+      cacheControl: "3600",
+      contentType: file.type || "application/octet-stream",
+      upsert: false,
+    });
     if (error) throw error;
   } finally {
     clearInterval(fakeTimer);

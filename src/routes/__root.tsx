@@ -23,11 +23,28 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Veil — Private messaging" },
-      { name: "description", content: "A social media app for private conversations with the people you choose." },
-      { property: "og:description", content: "A social media app for private conversations with the people you choose." },
-      { name: "twitter:description", content: "A social media app for private conversations with the people you choose." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/hxEE3nVOQGZ9Bq3OJGHIvEimYFN2/social-images/social-1778763675356-1000216224.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/hxEE3nVOQGZ9Bq3OJGHIvEimYFN2/social-images/social-1778763675356-1000216224.webp" },
+      {
+        name: "description",
+        content: "A social media app for private conversations with the people you choose.",
+      },
+      {
+        property: "og:description",
+        content: "A social media app for private conversations with the people you choose.",
+      },
+      {
+        name: "twitter:description",
+        content: "A social media app for private conversations with the people you choose.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/hxEE3nVOQGZ9Bq3OJGHIvEimYFN2/social-images/social-1778763675356-1000216224.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/hxEE3nVOQGZ9Bq3OJGHIvEimYFN2/social-images/social-1778763675356-1000216224.webp",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

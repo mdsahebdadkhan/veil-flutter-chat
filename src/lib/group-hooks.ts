@@ -118,23 +118,17 @@ export function useUserGroups(currentUserId: string | undefined) {
     if (!currentUserId) return;
     const channel = supabase
       .channel(`user-groups-${currentUserId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "group_members" },
-        () => reload()
+      .on("postgres_changes", { event: "*", schema: "public", table: "group_members" }, () =>
+        reload(),
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "groups" },
-        () => reload()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "groups" }, () => reload())
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           const row = payload.new as { group_id: string | null };
           if (row.group_id) reload();
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -177,12 +171,12 @@ export function useGroup(groupId: string | undefined) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "group_members", filter: `group_id=eq.${groupId}` },
-        () => reload()
+        () => reload(),
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "groups", filter: `id=eq.${groupId}` },
-        () => reload()
+        () => reload(),
       )
       .subscribe();
     return () => {
@@ -212,7 +206,7 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
         (data ?? []).map(async (m) => {
           const base = decodeMessageRow(m as Record<string, unknown>);
           return { ...base, text: await decryptMessage(base.encrypted_message) };
-        })
+        }),
       );
       setMessages(decoded);
       setLoading(false);
@@ -238,7 +232,7 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
           });
           const text = await decryptMessage(base.encrypted_message);
           setMessages((prev) => prev.map((m) => (m.id === base.id ? { ...m, text } : m)));
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -263,7 +257,7 @@ export function useGroupThread(currentUserId: string | undefined, groupId: strin
       });
       if (error) throw error;
     },
-    [currentUserId, groupId]
+    [currentUserId, groupId],
   );
 
   return { messages, loading, send };

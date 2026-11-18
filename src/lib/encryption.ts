@@ -12,7 +12,10 @@
  * in the app may claim messages are end-to-end encrypted.
  */
 
-export async function encryptMessage(plaintext: string, _receiverPublicKey?: string | null): Promise<string> {
+export async function encryptMessage(
+  plaintext: string,
+  _receiverPublicKey?: string | null,
+): Promise<string> {
   // TODO: replace with real asymmetric encryption using receiver's public_key.
   return plaintext;
 }

@@ -22,12 +22,12 @@ Recorded 2026-11-18 on branch `phase-1/foundation`, before any Phase 1 change.
 
 ## Measurements (base commit, before any change)
 
-| Check | Result |
-|---|---|
-| `bun run lint` | exit 1 — **358 problems (349 errors, 9 warnings)** |
-| `bun x tsc --noEmit` | exit 0 |
-| `bun run build` | exit 0 (built in 9.97s) |
-| `git ls-files` | 106 tracked files |
+| Check                | Result                                             |
+| -------------------- | -------------------------------------------------- |
+| `bun run lint`       | exit 1 — **358 problems (349 errors, 9 warnings)** |
+| `bun x tsc --noEmit` | exit 0                                             |
+| `bun run build`      | exit 0 (built in 9.97s)                            |
+| `git ls-files`       | 106 tracked files                                  |
 
 Lint detail: all 349 errors are `prettier/prettier` (formatting only);
 9 warnings are 8× `react-refresh/only-export-components` and

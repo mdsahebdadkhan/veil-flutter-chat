@@ -15,9 +15,7 @@ export function TypingIndicator({ label }: Props) {
       className="mt-2 flex items-end gap-2"
     >
       <div className="bg-bubble-them text-bubble-them-foreground rounded-2xl rounded-bl-md px-4 py-3 shadow-bubble">
-        {label && (
-          <p className="mb-1 text-[11px] font-semibold text-primary">{label}</p>
-        )}
+        {label && <p className="mb-1 text-[11px] font-semibold text-primary">{label}</p>}
         <div className="flex items-center gap-1">
           {[0, 1, 2].map((i) => (
             <motion.span

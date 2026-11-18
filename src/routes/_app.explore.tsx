@@ -20,9 +20,7 @@ function ExplorePage() {
     <div className="relative flex min-h-screen flex-col">
       <header className="glass-strong sticky top-0 z-20 border-b border-border/50 px-5 py-4">
         <h1 className="text-lg font-bold">Explore</h1>
-        <p className="text-[11px] text-muted-foreground mt-0.5">
-          Discover people on Veil
-        </p>
+        <p className="text-[11px] text-muted-foreground mt-0.5">Discover people on Veil</p>
       </header>
 
       <div className="px-5 pt-4">
@@ -41,10 +39,7 @@ function ExplorePage() {
         {loading ? (
           <ul className="grid grid-cols-2 gap-2 px-2 sm:grid-cols-3">
             {[0, 1, 2, 3, 4, 5].map((i) => (
-              <li
-                key={i}
-                className="h-32 animate-pulse rounded-2xl bg-card/40"
-              />
+              <li key={i} className="h-32 animate-pulse rounded-2xl bg-card/40" />
             ))}
           </ul>
         ) : users.length === 0 ? (
@@ -52,9 +47,7 @@ function ExplorePage() {
             icon={Compass}
             title="No one to explore yet"
             description={
-              query
-                ? "Try a different username."
-                : "When others join Veil they'll show up here."
+              query ? "Try a different username." : "When others join Veil they'll show up here."
             }
           />
         ) : (
@@ -73,12 +66,8 @@ function ExplorePage() {
                 >
                   <Avatar seed={u.id} name={u.display_name ?? u.username} size={56} online />
                   <div className="min-w-0 max-w-full">
-                    <p className="truncate text-sm font-semibold">
-                      {u.display_name ?? u.username}
-                    </p>
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      @{u.username}
-                    </p>
+                    <p className="truncate text-sm font-semibold">{u.display_name ?? u.username}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">@{u.username}</p>
                   </div>
                 </Link>
               </motion.li>

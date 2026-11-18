@@ -114,7 +114,11 @@ function AuthPage() {
 
   const submitDisabled =
     busy ||
-    (mode === "signup" && (usernameStatus === "checking" || usernameStatus === "taken" || usernameStatus === "invalid" || !username));
+    (mode === "signup" &&
+      (usernameStatus === "checking" ||
+        usernameStatus === "taken" ||
+        usernameStatus === "invalid" ||
+        !username));
 
   return (
     <motion.div
@@ -153,7 +157,9 @@ function AuthPage() {
           </motion.div>
           <h1 className="relative mt-4 text-3xl font-bold text-gradient">Veil</h1>
           <p className="relative mt-1 text-sm text-muted-foreground">
-            {mode === "signin" ? "Welcome back. Step behind the veil." : "Create your private space."}
+            {mode === "signin"
+              ? "Welcome back. Step behind the veil."
+              : "Create your private space."}
           </p>
         </div>
 
@@ -246,11 +252,21 @@ function AuthPage() {
           >
             <AnimatePresence mode="wait" initial={false}>
               {busy ? (
-                <motion.span key="busy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.span
+                  key="busy"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </motion.span>
               ) : (
-                <motion.span key="t" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.span
+                  key="t"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
                   {mode === "signin" ? "Sign in" : "Create account"}
                 </motion.span>
               )}
@@ -287,7 +303,8 @@ function AuthPage() {
 }
 
 function UsernameStatusIcon({ status }: { status: UsernameStatus }) {
-  if (status === "checking") return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+  if (status === "checking")
+    return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
   if (status === "available") return <Check className="h-4 w-4 text-online" />;
   if (status === "taken" || status === "invalid") return <X className="h-4 w-4 text-destructive" />;
   return null;
@@ -360,7 +377,10 @@ function GoogleIcon() {
         d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.95v2.33A9 9 0 0 0 9 18z"
         fill="#34A853"
       />
-      <path d="M3.97 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.29-1.71V4.96H.95A9 9 0 0 0 0 9c0 1.45.35 2.82.95 4.04l3.02-2.33z" fill="#FBBC05" />
+      <path
+        d="M3.97 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.29-1.71V4.96H.95A9 9 0 0 0 0 9c0 1.45.35 2.82.95 4.04l3.02-2.33z"
+        fill="#FBBC05"
+      />
       <path
         d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .95 4.96L3.97 7.3C4.68 5.18 6.66 3.58 9 3.58z"
         fill="#EA4335"

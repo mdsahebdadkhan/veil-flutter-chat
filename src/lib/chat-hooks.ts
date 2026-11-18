@@ -63,10 +63,7 @@ export async function fetchProfile(id: string): Promise<ChatUser | null> {
 /** Batch fetch profiles by id. */
 export async function fetchProfiles(ids: string[]): Promise<ChatUser[]> {
   if (ids.length === 0) return [];
-  const { data } = await supabase
-    .from("profiles")
-    .select(PROFILE_COLUMNS)
-    .in("id", ids);
+  const { data } = await supabase.from("profiles").select(PROFILE_COLUMNS).in("id", ids);
   return (data as ChatUser[] | null) ?? [];
 }
 
@@ -190,12 +187,16 @@ export function useConversations(currentUserId: string | undefined) {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
-          const row = payload.new as { sender_id: string; receiver_id: string | null; group_id: string | null };
+          const row = payload.new as {
+            sender_id: string;
+            receiver_id: string | null;
+            group_id: string | null;
+          };
           if (row.group_id) return;
           if (row.sender_id === currentUserId || row.receiver_id === currentUserId) {
             reload();
           }
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -243,7 +244,7 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
         .select("*")
         .is("group_id", null)
         .or(
-          `and(sender_id.eq.${currentUserId},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${currentUserId})`
+          `and(sender_id.eq.${currentUserId},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${currentUserId})`,
         )
         .order("created_at", { ascending: true });
       if (!active) return;
@@ -251,7 +252,7 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
         (data ?? []).map(async (m) => {
           const base = decodeMessageRow(m as Record<string, unknown>);
           return { ...base, text: await decryptMessage(base.encrypted_message) };
-        })
+        }),
       );
       setMessages(decoded);
       setLoading(false);
@@ -282,7 +283,7 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
           });
           const text = await decryptMessage(base.encrypted_message);
           setMessages((prev) => prev.map((m) => (m.id === base.id ? { ...m, text } : m)));
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -307,7 +308,7 @@ export function useThread(currentUserId: string | undefined, peerId: string | un
       });
       if (error) throw error;
     },
-    [currentUserId, peerId]
+    [currentUserId, peerId],
   );
 
   return { messages, loading, send };

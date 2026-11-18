@@ -30,15 +30,15 @@ changes.
 Execution must not start until D-0 is answered. D-1–D-6 may be answered
 together or per workstream at their gates, but each gates its workstream.
 
-| # | Decision | Recommendation | If declined |
-|---|---|---|---|
-| D-0 | **Merge PR #1 first?** Phase 0 is not on `main` (`origin/main` = `8ef591a`; PR #1 OPEN, MERGEABLE). | **Yes — PR #1 must be merged by the user, then `phase-1/foundation` is created from updated `main`.** | The user explicitly chooses a stacked PR: branch Phase 1 from `phase-0/stabilization` instead (Phase 1 cannot merge before PR #1; rebase churn if PR #1 changes). The choice must be explicit — silence is not a choice. Do not branch Phase 1 from pre-Phase-0 `main` — it would silently drop Phase 0. |
-| D-1 | **Data fetching: adopt TanStack Query or remove it?** (`@tanstack/react-query` installed, zero usage.) | **Adopt, staged (Option C): Query for reads, direct Supabase calls for writes in Phase 1.** Provider wired once; read models converted pilot-first (directory → conversations/groups → threads); mutations stay direct calls. Full `useMutation` migration is Phase 2. | Remove the dependency and harden custom hooks in place (dedup cache, error states, filters). Lower churn; every future feature re-implements caching. |
-| D-2 | **Dead server layer: delete, document, or wire?** (`client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`; zero call sites; `src/start.ts` missing.) | **Delete the three files in W5.** Nothing imports them; git history preserves them (reversible); keeping a service-role client that bypasses RLS lying around is a security smell. **Consequence for the environment file:** if D-2 is delete or dormant, `SUPABASE_SERVICE_ROLE_KEY` stays **out** of `.env.example` — no approved, actually-used server feature requires it (see W7). The variable is added only if a future decision approves and wires a server feature that needs it. | Document as dormant (keep files + add a `SERVER_LAYER.md` note) — preserves the scaffold for Phase 2 server work at the cost of continued confusion. Wiring them properly (S2) is out of Phase 1 scope. |
-| D-3 | **Provision a separate Supabase test project + test account for E2E?** | **Yes, if E2E is wanted in Phase 1.** One smoke spec only (see Testing Strategy §2.2). Credentials in CI secrets, never in the repo. | Decline: no E2E in Phase 1. Unit/integration + CI build + documented `wrangler dev` smoke is the floor; E2E is recorded as deferred. |
-| D-4 | **Delete 44 dead `ui/` files and their 35 orphaned dependencies?** | **Yes, after Knip confirms the survey** (W5 step 1). Keep `sonner.tsx` (live). `components.json` becomes vestigial — keep it (harmless) and note it; do not delete shadcn config speculatively. | Keep the files as a future component library. Then the 35 dependencies must also stay, and W5 shrinks to the 4 outright-unused deps + dead exports only. |
-| D-5 | **Commit `docs/` into the repo?** (`docs/audit/`, `docs/phase-0/`, `docs/phase-1/` are untracked; README links to them dangle on the pushed branch.) | **Yes — commit the docs on the Phase 1 branch** (one `docs:` commit). It fixes the dangling README links and makes the PR self-documenting. | Keep docs out of the repo; then W8 must remove the README links instead. |
-| D-6 | **Lint-gate path: exclude generated files + one mechanical `prettier --write` commit?** | **Yes.** Exclude `src/integrations/supabase/types.ts` (generated, 222 errors) from Prettier/ESLint like `routeTree.gen.ts` already is, then run `prettier --write` once as a formatting-only commit, then fix the 9 warnings by hand. | Fix 349 errors by hand across 29 files (slow, error-prone) or leave lint red and gate CI on typecheck/test/build only (lint stays unenforced). |
+| #   | Decision                                                                                                                                                   | Recommendation                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | If declined                                                                                                                                                                                                                                                                                              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-0 | **Merge PR #1 first?** Phase 0 is not on `main` (`origin/main` = `8ef591a`; PR #1 OPEN, MERGEABLE).                                                        | **Yes — PR #1 must be merged by the user, then `phase-1/foundation` is created from updated `main`.**                                                                                                                                                                                                                                                                                                                                                                                      | The user explicitly chooses a stacked PR: branch Phase 1 from `phase-0/stabilization` instead (Phase 1 cannot merge before PR #1; rebase churn if PR #1 changes). The choice must be explicit — silence is not a choice. Do not branch Phase 1 from pre-Phase-0 `main` — it would silently drop Phase 0. |
+| D-1 | **Data fetching: adopt TanStack Query or remove it?** (`@tanstack/react-query` installed, zero usage.)                                                     | **Adopt, staged (Option C): Query for reads, direct Supabase calls for writes in Phase 1.** Provider wired once; read models converted pilot-first (directory → conversations/groups → threads); mutations stay direct calls. Full `useMutation` migration is Phase 2.                                                                                                                                                                                                                     | Remove the dependency and harden custom hooks in place (dedup cache, error states, filters). Lower churn; every future feature re-implements caching.                                                                                                                                                    |
+| D-2 | **Dead server layer: delete, document, or wire?** (`client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`; zero call sites; `src/start.ts` missing.) | **Delete the three files in W5.** Nothing imports them; git history preserves them (reversible); keeping a service-role client that bypasses RLS lying around is a security smell. **Consequence for the environment file:** if D-2 is delete or dormant, `SUPABASE_SERVICE_ROLE_KEY` stays **out** of `.env.example` — no approved, actually-used server feature requires it (see W7). The variable is added only if a future decision approves and wires a server feature that needs it. | Document as dormant (keep files + add a `SERVER_LAYER.md` note) — preserves the scaffold for Phase 2 server work at the cost of continued confusion. Wiring them properly (S2) is out of Phase 1 scope.                                                                                                  |
+| D-3 | **Provision a separate Supabase test project + test account for E2E?**                                                                                     | **Yes, if E2E is wanted in Phase 1.** One smoke spec only (see Testing Strategy §2.2). Credentials in CI secrets, never in the repo.                                                                                                                                                                                                                                                                                                                                                       | Decline: no E2E in Phase 1. Unit/integration + CI build + documented `wrangler dev` smoke is the floor; E2E is recorded as deferred.                                                                                                                                                                     |
+| D-4 | **Delete 44 dead `ui/` files and their 35 orphaned dependencies?**                                                                                         | **Yes, after Knip confirms the survey** (W5 step 1). Keep `sonner.tsx` (live). `components.json` becomes vestigial — keep it (harmless) and note it; do not delete shadcn config speculatively.                                                                                                                                                                                                                                                                                            | Keep the files as a future component library. Then the 35 dependencies must also stay, and W5 shrinks to the 4 outright-unused deps + dead exports only.                                                                                                                                                 |
+| D-5 | **Commit `docs/` into the repo?** (`docs/audit/`, `docs/phase-0/`, `docs/phase-1/` are untracked; README links to them dangle on the pushed branch.)       | **Yes — commit the docs on the Phase 1 branch** (one `docs:` commit). It fixes the dangling README links and makes the PR self-documenting.                                                                                                                                                                                                                                                                                                                                                | Keep docs out of the repo; then W8 must remove the README links instead.                                                                                                                                                                                                                                 |
+| D-6 | **Lint-gate path: exclude generated files + one mechanical `prettier --write` commit?**                                                                    | **Yes.** Exclude `src/integrations/supabase/types.ts` (generated, 222 errors) from Prettier/ESLint like `routeTree.gen.ts` already is, then run `prettier --write` once as a formatting-only commit, then fix the 9 warnings by hand.                                                                                                                                                                                                                                                      | Fix 349 errors by hand across 29 files (slow, error-prone) or leave lint red and gate CI on typecheck/test/build only (lint stays unenforced).                                                                                                                                                           |
 
 ### 1.1 Approval boundaries (read before executing anything)
 
@@ -63,12 +63,12 @@ together or per workstream at their gates, but each gates its workstream.
 
 ## 2. Execution order (milestones)
 
-| Milestone | Workstreams | Gate to proceed |
-|---|---|---|
-| **M0 — Setup** | W0 | D-0 answered; branch created from correct base; baselines recorded |
-| **M1 — Safety nets** | W3 (Gitleaks CI) → W2 (CI) → W4 (typecheck) | CI green on the branch (except the known-red lint job, which is explicitly allowed to fail until M2) |
-| **M2 — Green lint** | W8a (generated-file exclusions + `prettier --write` + warning fixes) | `bun run lint` exits 0 on the branch |
-| **M3 — Tests + cleanup** | W1 (baseline tests) → W5 (dead code + deps) | `bun run test` green in CI on baseline tests; Knip clean; build + typecheck green after removals |
+| Milestone                   | Workstreams                                                                                                | Gate to proceed                                                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M0 — Setup**              | W0                                                                                                         | D-0 answered; branch created from correct base; baselines recorded                                                                           |
+| **M1 — Safety nets**        | W3 (Gitleaks CI) → W2 (CI) → W4 (typecheck)                                                                | CI green on the branch (except the known-red lint job, which is explicitly allowed to fail until M2)                                         |
+| **M2 — Green lint**         | W8a (generated-file exclusions + `prettier --write` + warning fixes)                                       | `bun run lint` exits 0 on the branch                                                                                                         |
+| **M3 — Tests + cleanup**    | W1 (baseline tests) → W5 (dead code + deps)                                                                | `bun run test` green in CI on baseline tests; Knip clean; build + typecheck green after removals                                             |
 | **M4 — Data + server + DX** | W6 (data fetching + tests for new behavior) → W7 (server/env/deploy) → W8b (structure/DX) → W9 (close-out) | All acceptance criteria in §5 hold on a clean clone; new-behavior tests green; B-items approved per §1.1; PR opened with verification report |
 
 Ordering rationale: secrets scanning and CI go first so every later change is
@@ -104,7 +104,7 @@ approval before execution (per the brief's constraint).
   goes in the PR description and `docs/phase-1/` notes.
 - **Steps:**
   1. Confirm D-0. If PR #1 is merged: `git checkout main && git pull &&
-     git checkout -b phase-1/foundation`. If stacked (D-0 declined):
+git checkout -b phase-1/foundation`. If stacked (D-0 declined):
      `git checkout -b phase-1/foundation phase-0/stabilization` and record the
      stacking in the PR description.
   2. Record baselines on the new branch before any change: `bun run lint`
@@ -116,7 +116,7 @@ approval before execution (per the brief's constraint).
 - **Dependencies:** D-0.
 - **Risks / rollback:** branching from the wrong base silently drops Phase 0
   (mitigated by step 1's explicit check and by verifying `git log --oneline
-  main..HEAD` contains the three Phase 0 commits). Rollback: delete the branch
+main..HEAD` contains the three Phase 0 commits). Rollback: delete the branch
   locally and remotely (`git branch -D`, `git push origin --delete`) — safe
   before any push of work; after push, prefer leaving the branch and starting
   a corrected one.
@@ -183,7 +183,7 @@ approval before execution (per the brief's constraint).
      (`bun run test`), `build` (`bun run build`). Pin every action to a full
      commit SHA, as W3 does for the Gitleaks workflow (verify each SHA against
      the action's official repository at authoring time). `concurrency:
-     cancel-in-progress: true` per branch.
+cancel-in-progress: true` per branch.
   2. Triggers: `push` (branches: `phase-1/foundation`) and `pull_request`
      (branches: `main`). Add `push` on `main` after merge so post-merge
      breakage is also caught.
@@ -237,7 +237,7 @@ approval before execution (per the brief's constraint).
      description — the ignore file itself holds fingerprints only.
      **Do not create `.gitleaks.toml`.** No custom configuration is needed.
      If custom configuration is ever required, the file must start with
-     `[extend] useDefault = true`: a `.gitleaks.toml` without it *replaces*
+     `[extend] useDefault = true`: a `.gitleaks.toml` without it _replaces_
      the default rules instead of extending them, which would silently disable
      all default detection. (Verified against the Gitleaks README, 2026-11-18:
      `.gitleaksignore` takes fingerprints one per line at the repo root; the
@@ -261,7 +261,7 @@ approval before execution (per the brief's constraint).
      ```
      What each part does and why:
      - `actions/checkout` with `fetch-depth: 0` checks out the **complete**
-       Git history, so the full history is *available* to the scan. That alone
+       Git history, so the full history is _available_ to the scan. That alone
        does not guarantee the action scans all of it (see the next bullet).
        The official action README uses exactly this step.
      - `gitleaks/gitleaks-action@v3` is the official action (v3.0.0; v3
@@ -269,8 +269,7 @@ approval before execution (per the brief's constraint).
        change). **Scope correction (2026-11-18, verified against the M1 CI
        run):** on push and pull-request events the action scans the event's
        commit range (e.g. the pushed commits), not necessarily the complete
-       Git history — the M1 run logged `gitleaks detect ...
-       --log-opts=--no-merges --first-parent <base>^..<head>` and "4 commits
+       Git history — the M1 run logged `gitleaks detect ...` `--log-opts=--no-merges --first-parent <base>^..<head>` and "4 commits
        scanned". The workflow's job is therefore to scan **new commits** in CI;
        it does not re-scan all history on every push. No scheduled trigger is
        added (decision: Option 1, accepted 2026-11-18).
@@ -335,7 +334,7 @@ approval before execution (per the brief's constraint).
     fake signature) committed, scan exit 1 with exactly one new finding
     (rule `jwt`, redacted) — proving a new finding still fails detection and
     the ignore file suppresses only the two known findings.
-  No test secrets or unwanted commits were left in the shared branch.
+    No test secrets or unwanted commits were left in the shared branch.
 - **Verification — new findings in CI:** a scratch commit containing a fake
   secret (e.g. a test JWT in a temp file) fails the scan — then the scratch
   commit is removed before merge. (The local fake-secret test above already
@@ -347,11 +346,11 @@ approval before execution (per the brief's constraint).
 - **Objective:** type-checking is a script, runs in CI, and covers server code
   correctly.
 - **Files affected (modified):** `package.json` (add `"typecheck":
-  "bun x tsc --noEmit"` — `bun x`, not `bunx`, because the `bunx` binary is
+"bun x tsc --noEmit"` — `bun x`, not `bunx`, because the `bunx` binary is
   not on PATH in this environment), `README.md` (replace `bunx tsc --noEmit`
   with `bun run typecheck`), `eslint.config.js` (add a `languageOptions`
   override with `globals.node` for server files: `src/integrations/supabase/
-  client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`, `vite.config.ts`
+client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`, `vite.config.ts`
   if needed), `tsconfig.json` (see step 2).
 - **Steps:**
   1. Add the `typecheck` script; fix the README command; add the ESLint node
@@ -366,7 +365,7 @@ approval before execution (per the brief's constraint).
   misuse (mitigation: scope the override to the named server files only, not
   `src/**`). Rollback: revert the commit; type-checking returns to README-only.
 - **Verification:** `bun run typecheck` exit 0 locally and in CI; `bun run
-  lint` shows no new errors from the config change.
+lint` shows no new errors from the config change.
 
 ### W5 — Unused dependencies and dead code (safe removal)
 
@@ -379,7 +378,7 @@ approval before execution (per the brief's constraint).
 - **Files affected (deleted):** 44 files in `src/components/ui/` (all except
   `sonner.tsx`), `src/components/PageTransition.tsx`,
   `src/hooks/use-mobile.tsx`, and — per D-2 — `src/integrations/supabase/
-  client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts` (only if D-2
+client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts` (only if D-2
   approves deletion).
 - **Files affected (new):** `knip.json` (entry-point config — see step 1).
 - **Steps:**
@@ -426,7 +425,7 @@ approval before execution (per the brief's constraint).
   restored from the lockfile. Deleting `ui/` files is recoverable from git
   history.
 - **Verification:** Knip exits 0 after cleanup; `bun install
-  --frozen-lockfile` exit 0; `bun run typecheck` exit 0; `bun run test` exit
+--frozen-lockfile` exit 0; `bun run typecheck` exit 0; `bun run test` exit
   0; `bun run build` exit 0; `git status` clean apart from intended changes.
 
 ### W6 — Consistent data-fetching strategy
@@ -435,13 +434,13 @@ approval before execution (per the brief's constraint).
   Query for reads, direct Supabase calls for writes in Phase 1), plus the
   hardening fixes that are independent of the choice.
 - **Files affected (new):** `src/lib/query-client.ts` (QueryClient instance
-  + defaults: `staleTime`, `gcTime`, `retry` policy — values decided at
-  authoring time and documented in the file).
+  - defaults: `staleTime`, `gcTime`, `retry` policy — values decided at
+    authoring time and documented in the file).
 - **Files affected (modified):** `src/routes/__root.tsx` (mount
   `QueryClientProvider`), `src/router.tsx` (pass the client through router
   context), `src/lib/chat-hooks.ts`, `src/lib/group-hooks.ts` (convert read
   hooks to `useQuery`; add `error` to every hook return), `src/routes/
-  chat.$peerId.tsx` (use `fetchProfile` instead of the inlined query),
+chat.$peerId.tsx` (use `fetchProfile` instead of the inlined query),
   `src/lib/auth-context.tsx` (fix the `exhaustive-deps` warning at line 75;
   **behavior-sensitive:** the missing `session.user` dependency — document the
   reason for the fix).
@@ -466,7 +465,7 @@ approval before execution (per the brief's constraint).
      **behavior-sensitive:** refresh semantics change from full reload to
      cache invalidation; document the reason).
   4. Convert `useThread` / `useGroupThread` → `useQuery` (keys `["thread",
-     userId, peerId]`, `["group-thread", groupId]`). Add the Postgres
+userId, peerId]`, `["group-thread", groupId]`). Add the Postgres
      `filter:` to the two unfiltered channels (P11) and state reset on key
      change (P14) in this step.
   5. Hardening (independent of Query, may land before steps 2–4 if preferred):
@@ -496,7 +495,7 @@ approval before execution (per the brief's constraint).
   hook implementation is restored exactly. **If any conversion regresses
   messaging in smoke testing, stop and revert that commit — do not press on.**
 - **Verification:** Tier 2 tests pass; `bun run typecheck` and `bun run
-  build` exit 0; `wrangler dev` smoke: sign in, open a DM thread, send a
+build` exit 0; `wrangler dev` smoke: sign in, open a DM thread, send a
   message, see it appear; open a group, send a message, see it appear;
   navigate peer A → peer B and confirm A's messages do not linger. (Smoke
   requires a signed-in account — use the test account from D-3 if approved,
@@ -542,7 +541,7 @@ approval before execution (per the brief's constraint).
 - **Risks / rollback:** adding `SUPABASE_SERVICE_ROLE_KEY` to `.env.example`
   is no longer a Phase 1 step (see step 2) — the risk below applies only if a
   future approved decision adds it. If that ever happens: documenting a
-  secret's *name* is safe (names are not values), but the comment must state
+  secret's _name_ is safe (names are not values), but the comment must state
   it is server-only and must never be given a value in the file.
   Adding `wrangler` as a direct dep can shift the resolved version —
   mitigation: pin to the already-resolved 4.76.0 and verify with a frozen
@@ -560,7 +559,7 @@ approval before execution (per the brief's constraint).
   `src/integrations/supabase/types.ts`), `eslint.config.js` (add the generated
   file to `ignores` if not already covered), every file `prettier --write`
   changes (formatting only — one commit, no logic changes), `src/lib/
-  auth-context.tsx` (fix the `exhaustive-deps` warning), the 8 files with
+auth-context.tsx` (fix the `exhaustive-deps` warning), the 8 files with
   `react-refresh/only-export-components` warnings (fix by moving the
   non-component export or adding the documented exception — per file, minimal
   change).
@@ -631,52 +630,52 @@ approval before execution (per the brief's constraint).
 One commit per numbered step-group below (squash nothing; each commit must
 leave the branch green or explicitly note the known-red lint job until M2).
 
-| # | Commit | Workstream |
-|---|---|---|
-| 1 | `chore: record Phase 1 baselines` (docs note only) | W0 |
-| 2 | `ci: add Gitleaks history scan workflow + .gitleaksignore` | W3 |
-| 3 | `ci: add GitHub Actions workflow (install, lint, typecheck, test, build)` | W2 |
-| 4 | `chore: add typecheck script and ESLint node globals for server files` | W4 |
-| 5 | `chore: exclude generated Supabase types from linting` | W8a |
-| 6 | `style: format with prettier (no logic changes)` | W8a |
-| 7 | `fix: resolve remaining lint warnings` | W8a |
-| 8 | `test: add testing foundation (bun test, fakes, Tier 1-3 baseline tests)` | W1 |
-| 9 | `test: add Playwright smoke spec` (only if D-3) | W1 |
-| 10 | `chore: add Knip config and confirm unused-code survey` | W5 |
-| 11 | `chore: remove dead ui components and orphaned files` | W5 |
-| 12 | `chore: remove unused dependencies` | W5 |
-| 13 | `chore: remove dead server layer` (only if D-2 approves deletion) | W5 |
-| 14 | `chore: enable noUnusedLocals/noUnusedParameters and no-unused-vars` | W5 |
-| 15 | `feat: wire TanStack Query provider` | W6 |
-| 16 | `feat: migrate directory/profile reads to TanStack Query (+ tests)` | W6 |
-| 17 | `feat: migrate conversations/groups reads to TanStack Query (+ tests)` | W6 |
-| 18 | `feat: migrate thread reads to TanStack Query; filter realtime channels (+ tests)` | W6 |
-| 19 | `fix: surface hook errors; fix username check; group-create cleanup (+ tests for new behavior)` | W6 |
-| 20 | `chore: add wrangler devDependency and scripts; fix .env.example (no service-role var — see W7)` | W7 |
-| 21 | `docs: fix README links, commands, and preview documentation` | W8b |
-| 22 | `chore: rename package to veil; add clean script` | W8b |
-| 23 | `docs: commit audit and phase plans` (only if D-5) | W8b |
+| #   | Commit                                                                                           | Workstream |
+| --- | ------------------------------------------------------------------------------------------------ | ---------- |
+| 1   | `chore: record Phase 1 baselines` (docs note only)                                               | W0         |
+| 2   | `ci: add Gitleaks history scan workflow + .gitleaksignore`                                       | W3         |
+| 3   | `ci: add GitHub Actions workflow (install, lint, typecheck, test, build)`                        | W2         |
+| 4   | `chore: add typecheck script and ESLint node globals for server files`                           | W4         |
+| 5   | `chore: exclude generated Supabase types from linting`                                           | W8a        |
+| 6   | `style: format with prettier (no logic changes)`                                                 | W8a        |
+| 7   | `fix: resolve remaining lint warnings`                                                           | W8a        |
+| 8   | `test: add testing foundation (bun test, fakes, Tier 1-3 baseline tests)`                        | W1         |
+| 9   | `test: add Playwright smoke spec` (only if D-3)                                                  | W1         |
+| 10  | `chore: add Knip config and confirm unused-code survey`                                          | W5         |
+| 11  | `chore: remove dead ui components and orphaned files`                                            | W5         |
+| 12  | `chore: remove unused dependencies`                                                              | W5         |
+| 13  | `chore: remove dead server layer` (only if D-2 approves deletion)                                | W5         |
+| 14  | `chore: enable noUnusedLocals/noUnusedParameters and no-unused-vars`                             | W5         |
+| 15  | `feat: wire TanStack Query provider`                                                             | W6         |
+| 16  | `feat: migrate directory/profile reads to TanStack Query (+ tests)`                              | W6         |
+| 17  | `feat: migrate conversations/groups reads to TanStack Query (+ tests)`                           | W6         |
+| 18  | `feat: migrate thread reads to TanStack Query; filter realtime channels (+ tests)`               | W6         |
+| 19  | `fix: surface hook errors; fix username check; group-create cleanup (+ tests for new behavior)`  | W6         |
+| 20  | `chore: add wrangler devDependency and scripts; fix .env.example (no service-role var — see W7)` | W7         |
+| 21  | `docs: fix README links, commands, and preview documentation`                                    | W8b        |
+| 22  | `chore: rename package to veil; add clean script`                                                | W8b        |
+| 23  | `docs: commit audit and phase plans` (only if D-5)                                               | W8b        |
 
 ---
 
 ## 5. Acceptance criteria (all must hold before the PR is opened)
 
-| # | Criterion | How verified |
-|---|---|---|
-| A1 | Branch `phase-1/foundation` created from `main` **after** PR #1 merged (or explicitly stacked, per D-0) | `git log` shows Phase 0 commits on the branch |
-| A2 | CI workflow runs on push + PR; all jobs green | GitHub Actions run on the PR |
-| A3 | Gitleaks workflow passes; job log shows CLI 8.30.1 and a `fetch-depth: 0` checkout; no leaks in the scanned commit range (push-triggered runs scan the event's range, not full history — see W3) | Workflow log; `.gitleaksignore` has exactly two fingerprint lines; full-history + ignore-file behavior verified locally in M1 (see W3) |
-| A4 | `bun run lint` exits 0 | Clean-clone run |
-| A5 | `bun run typecheck` exits 0 | Clean-clone run + CI |
-| A6 | `bun run test` exits 0: Tiers 1–3 **baseline** tests green; tests for new W6 behavior green (they land with the W6 fixes); Tier 4 iff D-3 | Clean-clone run + CI |
-| A7 | `bun install --frozen-lockfile` exits 0; `bun.lockb` unchanged by the install | Clean-clone run |
-| A8 | `bun run build` exits 0 | Clean-clone run + CI |
-| A9 | `wrangler dev` smoke: `/` and `/auth` 200; sign-in works; DM + group threads load; a message sends and appears | Manual smoke on the clean clone (test account if D-3, else dev account) |
-| A10 | Knip exits 0 (no unused deps/exports/files) after W5 | `bun x knip` on the branch |
-| A11 | No E2EE claims introduced; no new secrets; `.env` still untracked/ignored; `.env.example` values-free | Grep checks from Phase 0 §6.4, re-run |
-| A12 | No auth/messaging behavior change except the explicitly approved items in §6 | Diff review + smoke test (A9) |
-| A13 | README setup works from scratch on a clean clone | W7 verification |
-| A14 | Gitleaks history scan re-run: no new findings beyond the two ignored | Phase 0 scan procedure, v8.30.1 |
+| #   | Criterion                                                                                                                                                                                        | How verified                                                                                                                           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Branch `phase-1/foundation` created from `main` **after** PR #1 merged (or explicitly stacked, per D-0)                                                                                          | `git log` shows Phase 0 commits on the branch                                                                                          |
+| A2  | CI workflow runs on push + PR; all jobs green                                                                                                                                                    | GitHub Actions run on the PR                                                                                                           |
+| A3  | Gitleaks workflow passes; job log shows CLI 8.30.1 and a `fetch-depth: 0` checkout; no leaks in the scanned commit range (push-triggered runs scan the event's range, not full history — see W3) | Workflow log; `.gitleaksignore` has exactly two fingerprint lines; full-history + ignore-file behavior verified locally in M1 (see W3) |
+| A4  | `bun run lint` exits 0                                                                                                                                                                           | Clean-clone run                                                                                                                        |
+| A5  | `bun run typecheck` exits 0                                                                                                                                                                      | Clean-clone run + CI                                                                                                                   |
+| A6  | `bun run test` exits 0: Tiers 1–3 **baseline** tests green; tests for new W6 behavior green (they land with the W6 fixes); Tier 4 iff D-3                                                        | Clean-clone run + CI                                                                                                                   |
+| A7  | `bun install --frozen-lockfile` exits 0; `bun.lockb` unchanged by the install                                                                                                                    | Clean-clone run                                                                                                                        |
+| A8  | `bun run build` exits 0                                                                                                                                                                          | Clean-clone run + CI                                                                                                                   |
+| A9  | `wrangler dev` smoke: `/` and `/auth` 200; sign-in works; DM + group threads load; a message sends and appears                                                                                   | Manual smoke on the clean clone (test account if D-3, else dev account)                                                                |
+| A10 | Knip exits 0 (no unused deps/exports/files) after W5                                                                                                                                             | `bun x knip` on the branch                                                                                                             |
+| A11 | No E2EE claims introduced; no new secrets; `.env` still untracked/ignored; `.env.example` values-free                                                                                            | Grep checks from Phase 0 §6.4, re-run                                                                                                  |
+| A12 | No auth/messaging behavior change except the explicitly approved items in §6                                                                                                                     | Diff review + smoke test (A9)                                                                                                          |
+| A13 | README setup works from scratch on a clean clone                                                                                                                                                 | W7 verification                                                                                                                        |
+| A14 | Gitleaks history scan re-run: no new findings beyond the two ignored                                                                                                                             | Phase 0 scan procedure, v8.30.1                                                                                                        |
 
 ---
 
@@ -691,16 +690,16 @@ milestone gate, before its commit lands. The PR description must list which
 B-items were approved and which were deferred. Plan approval alone approves
 none of them.
 
-| # | Change | Workstream | Reason it needs approval |
-|---|---|---|---|
-| B1 | TanStack Query caching semantics (data may be served from cache; refresh changes from full reload to invalidation) | W6 steps 2–4 | Changes what users see and when (staleness windows) |
-| B2 | Thread `limit` + "load more" (currently unbounded fetch) | W6 step 5 | Changes what users see (older messages require an action) |
-| B3 | `checkUsernameAvailable` surfaces errors instead of returning `false` | W6 step 5 | Changes signup UX on network failure (error shown vs "taken") |
-| B4 | `createGroup` compensating delete on member-insert failure | W6 step 6 | Changes failure behavior (no orphaned group) |
-| B5 | Hook error states surfaced in UI (errors shown where empty lists appeared) | W6 step 5 | Changes what users see on failure |
-| B6 | `auth-context.tsx` exhaustive-deps fix (adds `session.user` dependency) | W6 / W8a | Changes effect re-run behavior in auth bootstrap |
-| B7 | Deleting the server layer (D-2) | W5 | Removes code a future phase might want; service-role client disappears |
-| B8 | Removing `VITE_SUPABASE_PROJECT_ID` from `.env.example` | W7 | Removes a documented variable (verify unused first) |
+| #   | Change                                                                                                             | Workstream   | Reason it needs approval                                               |
+| --- | ------------------------------------------------------------------------------------------------------------------ | ------------ | ---------------------------------------------------------------------- |
+| B1  | TanStack Query caching semantics (data may be served from cache; refresh changes from full reload to invalidation) | W6 steps 2–4 | Changes what users see and when (staleness windows)                    |
+| B2  | Thread `limit` + "load more" (currently unbounded fetch)                                                           | W6 step 5    | Changes what users see (older messages require an action)              |
+| B3  | `checkUsernameAvailable` surfaces errors instead of returning `false`                                              | W6 step 5    | Changes signup UX on network failure (error shown vs "taken")          |
+| B4  | `createGroup` compensating delete on member-insert failure                                                         | W6 step 6    | Changes failure behavior (no orphaned group)                           |
+| B5  | Hook error states surfaced in UI (errors shown where empty lists appeared)                                         | W6 step 5    | Changes what users see on failure                                      |
+| B6  | `auth-context.tsx` exhaustive-deps fix (adds `session.user` dependency)                                            | W6 / W8a     | Changes effect re-run behavior in auth bootstrap                       |
+| B7  | Deleting the server layer (D-2)                                                                                    | W5           | Removes code a future phase might want; service-role client disappears |
+| B8  | Removing `VITE_SUPABASE_PROJECT_ID` from `.env.example`                                                            | W7           | Removes a documented variable (verify unused first)                    |
 
 ---
 

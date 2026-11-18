@@ -15,7 +15,7 @@ export function FloatingParticles({ count = 18 }: FloatingParticlesProps) {
       Array.from({ length: count }).map((_, i) => {
         // Deterministic-ish but varied per index
         const seed = (i + 1) * 9301;
-        const rand = (n: number) => ((Math.sin(seed * (n + 1)) + 1) / 2);
+        const rand = (n: number) => (Math.sin(seed * (n + 1)) + 1) / 2;
         return {
           id: i,
           left: rand(1) * 100,

@@ -136,10 +136,7 @@ function GroupChatPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         {group && <Avatar seed={group.id} name={group.name} size={38} />}
-        <button
-          onClick={() => setShowInfo(true)}
-          className="min-w-0 flex-1 text-left"
-        >
+        <button onClick={() => setShowInfo(true)} className="min-w-0 flex-1 text-left">
           <p className="truncate text-sm font-semibold">{group?.name ?? "…"}</p>
           <p className="text-[11px] text-muted-foreground">
             {members.length} member{members.length === 1 ? "" : "s"}
@@ -184,7 +181,11 @@ function GroupChatPage() {
                     }`}
                   >
                     {!mine && !grouped && sender && (
-                      <Avatar seed={sender.id} name={sender.display_name ?? sender.username} size={28} />
+                      <Avatar
+                        seed={sender.id}
+                        name={sender.display_name ?? sender.username}
+                        size={28}
+                      />
                     )}
                     {!mine && grouped && <div style={{ width: 28 }} />}
                     <div
@@ -201,9 +202,7 @@ function GroupChatPage() {
                         </p>
                       )}
                       {m.media_url && <MediaBubble message={m} mine={mine} />}
-                      {m.text && (
-                        <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>
-                      )}
+                      {m.text && <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>}
                       <span
                         className={`block text-[10px] ${
                           mine ? "text-white/70" : "text-muted-foreground"
@@ -287,10 +286,7 @@ function GroupChatPage() {
               </h3>
               <ul className="scrollbar-thin max-h-[45vh] space-y-1 overflow-y-auto">
                 {members.map((m) => (
-                  <li
-                    key={m.user_id}
-                    className="flex items-center gap-3 rounded-2xl px-2 py-2"
-                  >
+                  <li key={m.user_id} className="flex items-center gap-3 rounded-2xl px-2 py-2">
                     {m.profile && (
                       <Avatar
                         seed={m.profile.id}
@@ -311,17 +307,15 @@ function GroupChatPage() {
                         Admin
                       </span>
                     )}
-                    {user &&
-                      m.user_id !== user.id &&
-                      memberById.get(user.id)?.role === "admin" && (
-                        <button
-                          onClick={() => onRemoveMember(m.user_id)}
-                          className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
-                          aria-label="Remove member"
-                        >
-                          <UserMinus className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+                    {user && m.user_id !== user.id && memberById.get(user.id)?.role === "admin" && (
+                      <button
+                        onClick={() => onRemoveMember(m.user_id)}
+                        className="rounded-full glass p-1.5 text-muted-foreground hover:text-destructive"
+                        aria-label="Remove member"
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

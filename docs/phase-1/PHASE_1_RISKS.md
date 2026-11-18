@@ -87,7 +87,7 @@ Severity key: **L** likelihood (Low/Medium/High) · **I** impact (Low/Medium/Hig
   too broadly (a wrong fingerprint, or an extra line added) and a future real
   secret matching it passes CI silently. A second form of this risk: a
   `.gitleaks.toml` is added without `[extend] useDefault = true`, which
-  *replaces* the default rules instead of extending them and silently disables
+  _replaces_ the default rules instead of extending them and silently disables
   all default detection. A third form: the workflow scans a shallow checkout,
   or runs an unpinned Gitleaks version, so the history scan is not what the
   plan claims.
@@ -265,28 +265,28 @@ Severity key: **L** likelihood (Low/Medium/High) · **I** impact (Low/Medium/Hig
 
 ## 2. Known constraints (not risks — facts that bound the phase)
 
-| # | Constraint | Consequence for Phase 1 |
-|---|---|---|
-| C1 | All Vite/build config lives in `@lovable.dev/vite-tanstack-config` | No in-repo Vite changes; ejection is out of scope (R10) |
-| C2 | `bunx` binary is not on PATH in this environment | Scripts use `bun x` (e.g. `bun x tsc`, `bun x knip`) |
-| C3 | `/tmp` is a 512 MB tmpfs | Verification clones live under `~/workspace`, not `/tmp` (Phase 0 lesson) |
-| C4 | `main` has 359 pre-existing lint problems; the gate has never passed | Lint must be fixed mechanically (W8a) before it can guard anything |
-| C5 | No test Supabase project exists today | E2E is gated on D-3; without it, verification is unit/integration + manual smoke |
-| C6 | The exposed anon key is still unrotated (Phase 0 §4.4, approval-gated) | Phase 1 does not rotate it; rotation remains a separate approval |
-| C7 | Every data path is Supabase-native today | Server functions (if ever adopted) must be reserved for web-only or secret-bearing operations, or Flutter compatibility breaks |
+| #   | Constraint                                                             | Consequence for Phase 1                                                                                                        |
+| --- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| C1  | All Vite/build config lives in `@lovable.dev/vite-tanstack-config`     | No in-repo Vite changes; ejection is out of scope (R10)                                                                        |
+| C2  | `bunx` binary is not on PATH in this environment                       | Scripts use `bun x` (e.g. `bun x tsc`, `bun x knip`)                                                                           |
+| C3  | `/tmp` is a 512 MB tmpfs                                               | Verification clones live under `~/workspace`, not `/tmp` (Phase 0 lesson)                                                      |
+| C4  | `main` has 359 pre-existing lint problems; the gate has never passed   | Lint must be fixed mechanically (W8a) before it can guard anything                                                             |
+| C5  | No test Supabase project exists today                                  | E2E is gated on D-3; without it, verification is unit/integration + manual smoke                                               |
+| C6  | The exposed anon key is still unrotated (Phase 0 §4.4, approval-gated) | Phase 1 does not rotate it; rotation remains a separate approval                                                               |
+| C7  | Every data path is Supabase-native today                               | Server functions (if ever adopted) must be reserved for web-only or secret-bearing operations, or Flutter compatibility breaks |
 
 ---
 
 ## 3. Residual risks after Phase 1 (accepted, not fixed)
 
-| # | Residual risk | Why it remains | Next step |
-|---|---|---|---|
+| #   | Residual risk                                                               | Why it remains                                                                                         | Next step                                                                      |
+| --- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | RR1 | RLS is the only enforcement layer; no defense in depth if a policy is wrong | Phase 1 does not change RLS or add server checks (out of scope; dashboard/migration changes forbidden) | Phase 2: RLS policy review + server-side verification for sensitive operations |
-| RR2 | Media upload validation stays client-only on a public bucket | Tightening needs Storage policies or server-side validation (Phase 2) | Phase 2: Storage policy review; consider signed URLs |
-| RR3 | No E2EE; messages are plaintext at rest in Supabase | Explicitly out of Phase 1 | Future phase: real E2EE design (never claim it before it exists) |
-| RR4 | Unread/presence/typing stay stubbed | Product work, not foundation | Future phase, with product decisions |
-| RR5 | `vite preview` stays broken (documented, not fixed) | Fixing it means reconfiguring the build (C1) | Revisit if the Vite config is ever ejected |
-| RR6 | No coverage threshold; no visual/perf/a11y automation | Deliberately deferred (see Testing Strategy §8) | Phase 2: threshold from real coverage data |
+| RR2 | Media upload validation stays client-only on a public bucket                | Tightening needs Storage policies or server-side validation (Phase 2)                                  | Phase 2: Storage policy review; consider signed URLs                           |
+| RR3 | No E2EE; messages are plaintext at rest in Supabase                         | Explicitly out of Phase 1                                                                              | Future phase: real E2EE design (never claim it before it exists)               |
+| RR4 | Unread/presence/typing stay stubbed                                         | Product work, not foundation                                                                           | Future phase, with product decisions                                           |
+| RR5 | `vite preview` stays broken (documented, not fixed)                         | Fixing it means reconfiguring the build (C1)                                                           | Revisit if the Vite config is ever ejected                                     |
+| RR6 | No coverage threshold; no visual/perf/a11y automation                       | Deliberately deferred (see Testing Strategy §8)                                                        | Phase 2: threshold from real coverage data                                     |
 
 ---
 

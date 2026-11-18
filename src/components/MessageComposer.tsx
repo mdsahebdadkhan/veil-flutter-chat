@@ -14,7 +14,12 @@ interface Props {
   placeholder?: string;
 }
 
-export function MessageComposer({ currentUserId, onSend, onTyping, placeholder = "Message…" }: Props) {
+export function MessageComposer({
+  currentUserId,
+  onSend,
+  onTyping,
+  placeholder = "Message…",
+}: Props) {
   const [draft, setDraft] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

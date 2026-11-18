@@ -130,11 +130,7 @@ function GroupsPage() {
         <Plus className="h-6 w-6 text-primary-foreground" />
       </motion.button>
 
-      <CreateGroupSheet
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-        onCreated={reload}
-      />
+      <CreateGroupSheet open={showCreate} onClose={() => setShowCreate(false)} onCreated={reload} />
     </div>
   );
 }
@@ -213,7 +209,6 @@ function CreateGroupSheet({
       return next;
     });
   };
-
 
   return (
     <AnimatePresence>

@@ -50,11 +50,7 @@ function ChatsPage() {
       </header>
 
       <div className="px-5 pt-4">
-        <SearchInput
-          value={query}
-          onChange={setQuery}
-          placeholder="Search conversations…"
-        />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search conversations…" />
       </div>
 
       <main className="scrollbar-thin flex-1 overflow-y-auto px-3 pb-32 pt-3">
@@ -94,11 +90,7 @@ function ChatsPage() {
                     params={{ peerId: c.peer.id }}
                     className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition-all hover:border-white/10 hover:bg-white/[0.04]"
                   >
-                    <Avatar
-                      seed={c.peer.id}
-                      name={c.peer.display_name ?? c.peer.username}
-                      online
-                    />
+                    <Avatar seed={c.peer.id} name={c.peer.display_name ?? c.peer.username} online />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-sm font-semibold">
@@ -195,10 +187,7 @@ function SkeletonList() {
   return (
     <ul className="space-y-1.5 px-2">
       {[0, 1, 2, 3, 4].map((i) => (
-        <li
-          key={i}
-          className="flex items-center gap-3 rounded-2xl px-3 py-3"
-        >
+        <li key={i} className="flex items-center gap-3 rounded-2xl px-3 py-3">
           <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-card/50" />
           <div className="flex-1 space-y-2">
             <div className="h-3 w-1/3 animate-pulse rounded bg-card/50" />
@@ -243,10 +232,7 @@ function DirectorySheet({
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">Start a conversation</h2>
-              <button
-                onClick={onClose}
-                className="rounded-full glass p-2 hover:bg-white/10"
-              >
+              <button onClick={onClose} className="rounded-full glass p-2 hover:bg-white/10">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -274,9 +260,7 @@ function DirectorySheet({
                   >
                     <Avatar seed={u.id} name={u.display_name ?? u.username} online />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {u.display_name ?? u.username}
-                      </p>
+                      <p className="truncate text-sm font-medium">{u.display_name ?? u.username}</p>
                       <p className="truncate text-xs text-muted-foreground">@{u.username}</p>
                     </div>
                   </Link>

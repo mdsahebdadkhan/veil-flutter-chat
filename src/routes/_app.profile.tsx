@@ -30,9 +30,7 @@ function ProfilePage() {
     <div className="relative flex min-h-screen flex-col">
       <header className="glass-strong sticky top-0 z-20 border-b border-border/50 px-5 py-4">
         <h1 className="text-lg font-bold">Profile</h1>
-        <p className="text-[11px] text-muted-foreground mt-0.5">
-          Account, privacy and appearance
-        </p>
+        <p className="text-[11px] text-muted-foreground mt-0.5">Account, privacy and appearance</p>
       </header>
 
       <main className="scrollbar-thin flex-1 overflow-y-auto px-4 pb-32 pt-4">
@@ -58,9 +56,7 @@ function ProfilePage() {
               <p className="truncate text-xl font-bold">
                 {profile?.display_name ?? profile?.username ?? "…"}
               </p>
-              <p className="truncate text-sm text-muted-foreground">
-                @{profile?.username ?? ""}
-              </p>
+              <p className="truncate text-sm text-muted-foreground">@{profile?.username ?? ""}</p>
               <div className="mt-2 inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-[10px] text-muted-foreground">
                 <ShieldCheck className="h-3 w-3 text-primary" />
                 Privacy-first account

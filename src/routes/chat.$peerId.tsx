@@ -53,9 +53,13 @@ function ChatPage() {
         <Link to="/chats" className="rounded-full glass p-2 hover:bg-white/10 transition-colors">
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        {peer && <Avatar seed={peer.id} name={peer.display_name ?? peer.username} size={38} online />}
+        {peer && (
+          <Avatar seed={peer.id} name={peer.display_name ?? peer.username} size={38} online />
+        )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{peer?.display_name ?? peer?.username ?? "…"}</p>
+          <p className="truncate text-sm font-semibold">
+            {peer?.display_name ?? peer?.username ?? "…"}
+          </p>
           <p className="text-[11px] text-muted-foreground">@{peer?.username ?? ""}</p>
         </div>
       </header>
@@ -67,7 +71,8 @@ function ChatPage() {
               const mine = m.sender_id === user.id;
               const prev = messages[i - 1];
               const showDate =
-                !prev || new Date(m.created_at).toDateString() !== new Date(prev.created_at).toDateString();
+                !prev ||
+                new Date(m.created_at).toDateString() !== new Date(prev.created_at).toDateString();
               const grouped = prev && prev.sender_id === m.sender_id && !showDate;
               return (
                 <div key={m.id}>
@@ -94,9 +99,7 @@ function ChatPage() {
                       style={mine ? { background: "var(--gradient-bubble-me)" } : undefined}
                     >
                       {m.media_url && <MediaBubble message={m} mine={mine} />}
-                      {m.text && (
-                        <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>
-                      )}
+                      {m.text && <p className="whitespace-pre-wrap break-words px-1">{m.text}</p>}
                       <span
                         className={`block text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"} text-right`}
                       >
@@ -111,8 +114,14 @@ function ChatPage() {
 
           {messages.length === 0 && (
             <div className="mt-20 text-center text-sm text-muted-foreground">
-              <p>This is the beginning of your conversation with {peer?.display_name ?? peer?.username ?? "this user"}.</p>
-              <p className="mt-1 text-[11px]">Messages are transmitted over an encrypted connection (TLS), but are not yet end-to-end encrypted.</p>
+              <p>
+                This is the beginning of your conversation with{" "}
+                {peer?.display_name ?? peer?.username ?? "this user"}.
+              </p>
+              <p className="mt-1 text-[11px]">
+                Messages are transmitted over an encrypted connection (TLS), but are not yet
+                end-to-end encrypted.
+              </p>
             </div>
           )}
         </div>
