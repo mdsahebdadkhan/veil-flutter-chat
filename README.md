@@ -38,7 +38,7 @@ bun run dev      # start the dev server
 bun run build    # production build (Cloudflare Workers via wrangler)
 bun run preview  # preview the production build locally
 bun run lint     # eslint
-bunx tsc --noEmit  # type checking
+bun run typecheck  # type checking
 ```
 
 ## Documentation

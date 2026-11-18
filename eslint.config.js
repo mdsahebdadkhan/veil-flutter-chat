@@ -24,5 +24,19 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // Server-side files run under Node, not the browser: they use
+    // process.env (client.server.ts, auth-middleware.ts). Scope the Node
+    // globals to exactly these files, not src/**.
+    files: [
+      "src/integrations/supabase/client.server.ts",
+      "src/integrations/supabase/auth-middleware.ts",
+      "src/integrations/supabase/auth-attacher.ts",
+      "vite.config.ts",
+    ],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
   eslintPluginPrettier,
 );
