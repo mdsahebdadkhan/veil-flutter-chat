@@ -30,3 +30,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files — never commit .env or any local env file.
+# .env.example is the values-free template and stays tracked.
+.env
+.env.*
+!.env.example
