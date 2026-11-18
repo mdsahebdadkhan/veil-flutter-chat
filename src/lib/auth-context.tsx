@@ -87,4 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// react-refresh/only-export-components: useAuth is the accessor for this
+// file's AuthContext and is imported by live routes/components
+// (EditProfileDialog, _app.chats, _app.explore); moving it would change its
+// import path. Scoped to this line.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

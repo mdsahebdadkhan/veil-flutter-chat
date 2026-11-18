@@ -39,4 +39,8 @@ const Toggle = React.forwardRef<
 
 Toggle.displayName = TogglePrimitive.Root.displayName;
 
+// react-refresh/only-export-components: toggleVariants is imported by
+// toggle-group (dead ui/ file, slated for removal in W5); moving it would
+// churn a dead file for no benefit. Scoped to this line.
+// eslint-disable-next-line react-refresh/only-export-components
 export { Toggle, toggleVariants };

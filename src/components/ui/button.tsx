@@ -46,4 +46,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
+// react-refresh/only-export-components: buttonVariants is imported by
+// alert-dialog and calendar (dead ui/ files, slated for removal in W5);
+// moving it would churn those files for no benefit. Scoped to this line.
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };
