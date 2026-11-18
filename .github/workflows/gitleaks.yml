@@ -1,0 +1,25 @@
+name: gitleaks
+
+on:
+  push:
+    branches: [phase-1/foundation]
+  pull_request:
+    branches: [main]
+
+# Triage (Phase 0, 2026-11-18): the two findings ignored by .gitleaksignore are
+# rule jwt, file .env, commit 8062505, lines 1 and 4 — Supabase
+# publishable/anon keys, publishable by design. The ignore file holds
+# fingerprints only; no secret values appear anywhere in this workflow.
+
+jobs:
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.30.1
