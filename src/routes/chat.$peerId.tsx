@@ -112,7 +112,7 @@ function ChatPage() {
           {messages.length === 0 && (
             <div className="mt-20 text-center text-sm text-muted-foreground">
               <p>This is the beginning of your conversation with {peer?.display_name ?? peer?.username ?? "this user"}.</p>
-              <p className="mt-1 text-[11px]">Messages are stored encryption-ready.</p>
+              <p className="mt-1 text-[11px]">Messages are transmitted over an encrypted connection (TLS), but are not yet end-to-end encrypted.</p>
             </div>
           )}
         </div>

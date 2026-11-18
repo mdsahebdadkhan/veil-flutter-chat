@@ -1,12 +1,15 @@
 /**
- * Encryption layer — placeholder.
+ * Encryption layer — placeholder. No end-to-end encryption exists yet.
  *
- * Veil treats every message as encrypted on the wire. Right now these helpers
- * are pass-through, but ALL message content flows through them so a real
- * end-to-end encryption scheme (e.g. libsodium / Signal protocol) can be
- * dropped in here without touching UI or data-access code.
+ * These helpers are identity pass-throughs: encryptMessage returns its input
+ * unchanged and decryptMessage returns its input unchanged. Messages are
+ * currently stored and transmitted as plaintext over TLS. Nothing here
+ * encrypts message content, derives keys, or manages key material.
  *
- * Plaintext NEVER appears on a `message` field — only `encrypted_message`.
+ * ALL message content flows through these helpers so a real end-to-end
+ * encryption scheme (e.g. libsodium / Signal protocol) can be dropped in
+ * here without touching UI or data-access code. Until that lands, no copy
+ * in the app may claim messages are end-to-end encrypted.
  */
 
 export async function encryptMessage(plaintext: string, _receiverPublicKey?: string | null): Promise<string> {

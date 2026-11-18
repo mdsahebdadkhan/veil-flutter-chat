@@ -237,8 +237,7 @@ function GroupChatPage() {
               </div>
               <p className="text-sm font-semibold">Welcome to {group?.name ?? "your group"}</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                This is the start of your private group chat. Messages are end-to-end encrypted.
-                Say hi and break the ice ✨
+                This is the start of your private group chat. Say hi and break the ice ✨
               </p>
             </motion.div>
           )}
